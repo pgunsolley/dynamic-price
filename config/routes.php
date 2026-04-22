@@ -62,20 +62,37 @@ return function (RouteBuilder $routes): void {
          */
         $builder->connect('/pages/*', 'Pages::display');
 
-        /*
-         * Connect catchall routes for all controllers.
-         *
-         * The `fallbacks` method is a shortcut for
-         *
-         * ```
-         * $builder->connect('/{controller}', ['action' => 'index']);
-         * $builder->connect('/{controller}/{action}/*', []);
-         * ```
-         *
-         * It is NOT recommended to use fallback routes after your initial prototyping phase!
-         * See https://book.cakephp.org/5/en/development/routing.html#fallbacks-method for more information
-         */
-        $builder->fallbacks();
+        $builder->connect(
+            '/register',
+            ['controller' => 'Users', 'action' => 'register'],
+            ['_name' => 'users:register'],
+        );
+        
+        $builder->connect(
+            '/login',
+            ['controller' => 'Users', 'action' => 'login'],
+            ['_name' => 'users:login'],
+        );
+
+        $builder->connect(
+            '/logout',
+            ['controller' => 'Users', 'action' => 'login'],
+            ['_name' => 'users:logout'],
+        );
+
+        $builder
+            ->connect(
+                '/verify-email/{token}',
+                ['controller' => 'Users', 'action' => 'verifyEmail'],
+                ['_name' => 'users:verifyEmail'],
+            )
+            ->setPass(['token']);
+
+        $builder->connect(
+            '/resend-verification-email',
+            ['controller' => 'Users', 'action' => 'resendVerificationEmail'],
+            ['_name' => 'users:resendVerificationEmail'],
+        );
     });
 
     /*

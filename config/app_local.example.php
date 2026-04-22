@@ -94,4 +94,10 @@ return [
             'url' => env('EMAIL_TRANSPORT_DEFAULT_URL', null),
         ],
     ],
+
+    'UserJwt' => [
+        'publicKey' => '',
+        'privateKey' => '',
+        'algorithm' => '',
+    ],
 ];

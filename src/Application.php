@@ -17,6 +17,8 @@ declare(strict_types=1);
 namespace App;
 
 use App\Middleware\HostHeaderMiddleware;
+use App\Service\UsersJwtService;
+use App\Service\UsersMailerService;
 use Cake\Core\Configure;
 use Cake\Core\ContainerInterface;
 use Cake\Datasource\FactoryLocator;
@@ -29,6 +31,7 @@ use Cake\Http\MiddlewareQueue;
 use Cake\ORM\Locator\TableLocator;
 use Cake\Routing\Middleware\AssetMiddleware;
 use Cake\Routing\Middleware\RoutingMiddleware;
+use League\Container\Argument\Literal\StringArgument;
 
 /**
  * Application setup class.
@@ -108,6 +111,17 @@ class Application extends BaseApplication
     {
         // Allow your Tables to be dependency injected
         //$container->delegate(new \Cake\ORM\Locator\TableContainer());
+        $container
+            ->addShared(UsersJwtService::class)
+            ->addArguments([
+                new StringArgument(Configure::readOrFail('UserJwt.privateKey')),
+                new StringArgument(Configure::readOrFail('UserJwt.publicKey')),
+                new StringArgument(Configure::read('UserJwt.algorithm')),
+            ]);
+
+        $container
+            ->addShared(UsersMailerService::class)
+            ->addArgument(UsersJwtService::class);
     }
 
     /**
