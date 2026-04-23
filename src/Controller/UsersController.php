@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Form\EmailForm;
+use App\Form\Enum\UserFormResult;
+use App\Form\UserForm;
 use App\Model\Entity\User;
 use App\Service\UsersJwtService;
 use App\Service\UsersMailerService;
@@ -46,30 +47,22 @@ class UsersController extends AppController
 
     public function resendVerificationEmail(UsersMailerService $usersMailer)
     {
-        // TODO: Consider requiring a password .. probably a good idea bud
-        $emailForm = new EmailForm();
+        $userForm = new UserForm();
 
         if ($this->request->is('post')) {
-            if ($emailForm->execute($this->request->getData())) {
-                $email = $emailForm->getData('email');
-                $user = $this
-                    ->Users
-                    ->find('byEmail', email: $email)
-                    ->first();
-
-                if ($user === null) {
-                    $this->Flash->error(__('Account does not exist for email {0}', $email));
-                    return $this->redirect(['_name' => 'users:register']);
-                } else if ($user->email_verified) {
-                    $this->Flash->error(__('Email has already been verified'));
-                    return $this->redirect(['_name' => 'users:login']);
-                }
-
-                $this->sendVerificationEmail($usersMailer, $user);
-            }
+            $userForm->execute($this->request->getData());
+            $email = $userForm->getData('email');
+            
+            match ($userForm->getResult()) {
+                UserFormResult::Success             => $this->sendVerificationEmail($usersMailer, $userForm->getUser()),
+                UserFormResult::ValidationError     => $this->Flash->error(__('Invalid email or password')),
+                UserFormResult::UserNotFound        => $this->Flash->error(__('No account for {0}', $email)),
+                UserFormResult::InvalidPassword     => $this->Flash->error(__('Invalid password for {0}', $email)),
+                UserFormResult::Pending             => $this->Flash->error(__('Unable to process request')),
+            };
         }
 
-        $this->set(compact('emailForm'));
+        $this->set(compact('userForm'));
     }
 
     public function verifyEmail(UsersJwtService $usersJwt, string $token): Response

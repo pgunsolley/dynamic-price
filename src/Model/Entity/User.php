@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Model\Entity;
 
 use Authentication\PasswordHasher\DefaultPasswordHasher;
+use Cake\Datasource\Exception\MissingPropertyException;
 use Cake\ORM\Entity;
 
 /**
@@ -44,8 +45,19 @@ class User extends Entity
         'password',
     ];
 
-    protected function _setPassword(string $value): string
+    protected function _setPassword(string $unhashedValue): string
     {
-        return (new DefaultPasswordHasher())->hash($value);
+        return (new DefaultPasswordHasher())->hash($unhashedValue);
+    }
+
+    public function checkPassword(string $unhashedValue): bool
+    {
+        $password = $this->get('password');
+
+        if (!$password) {
+            throw new MissingPropertyException('"password" is missing on User');
+        }
+
+        return (new DefaultPasswordHasher())->check($unhashedValue, $password);
     }
 }
