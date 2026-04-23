@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Form\EmailForm;
 use App\Form\Enum\UserFormResult;
 use App\Form\UserForm;
 use App\Model\Entity\User;
 use App\Service\UsersJwtService;
 use App\Service\UsersMailerService;
 use Cake\Http\Exception\NotImplementedException;
-use Cake\Http\Response;
 use Firebase\JWT\ExpiredException;
 use Exception;
 
@@ -29,35 +29,42 @@ class UsersController extends AppController
     public function register(UsersMailerService $usersMailer)
     {
         $user = $this->Users->newEmptyEntity();
+        $verificationEmailSent = false;
 
         if ($this->request->is('post')) {
             $this->Users->patchEntity($user, $this->request->getData());
 
             if ($this->Users->save($user)) {
                 $this->sendVerificationEmail($usersMailer, $user);
+                $verificationEmailSent = true;
             } else {
                 $this->Flash->error(__('Unable to register new account'));
             }
-
-            return $this->redirect(['_name' => 'users:resendVerificationEmail']);
         }
 
         $this->set(compact('user'));
+        $this->set(compact('verificationEmailSent'));
     }
 
-    public function resendVerificationEmail(UsersMailerService $usersMailer)
+    public function requestEmailVerification(UsersMailerService $usersMailer)
     {
         $userForm = new UserForm();
 
         if ($this->request->is('post')) {
             $userForm->execute($this->request->getData());
             $email = $userForm->getData('email');
-            
+            $user = $userForm->getUser();
+
+            if ($user?->email_verified) {
+                $this->Flash->error(__('Account is already verified'));
+                // TODO: return redirect to landing
+            }
+
             match ($userForm->getResult()) {
-                UserFormResult::Success             => $this->sendVerificationEmail($usersMailer, $userForm->getUser()),
+                UserFormResult::Success             => $this->sendVerificationEmail($usersMailer, $user),
                 UserFormResult::ValidationError     => $this->Flash->error(__('Invalid email or password')),
                 UserFormResult::UserNotFound        => $this->Flash->error(__('No account for {0}', $email)),
-                UserFormResult::InvalidPassword     => $this->Flash->error(__('Invalid password for {0}', $email)),
+                UserFormResult::InvalidPassword     => $this->Flash->error(__('Password is incorrect')),
                 UserFormResult::Pending             => $this->Flash->error(__('Unable to process request')),
             };
         }
@@ -65,39 +72,62 @@ class UsersController extends AppController
         $this->set(compact('userForm'));
     }
 
-    public function verifyEmail(UsersJwtService $usersJwt, string $token): Response
+    public function handleEmailVerification(UsersJwtService $usersJwt, string $token)
     {
         try {
             $userId = $usersJwt->extractUserId($token);
         } catch (ExpiredException) {
             $this->Flash->error(__('The verification link has expired'));
-        } catch (Exception $e) {
-            // Something seriously went wrong with the jwt.. maybe log this
-        } finally {
+        } catch (Exception) {
             $this->Flash->error(__('Unable to verify email'));
-            return $this->redirect(['_name' => 'users:resendVerificationEmail']);
+        } finally {
+            return $this->redirect(['_name' => 'users:requestEmailVerification']);
         }
 
-        $user = $this->Users->get($userId);
-        $user->set('email_verified', true);
-        
-        if (!$this->Users->save($user)) {
-            $this->Flash->error(__('Unable to update user account'));
-            return $this->redirect(['_name' => 'users:resendVerificationEmail']);
+        $user = $this->Users->get(primaryKey: $userId, finder: 'emailNotVerified');
+
+        if ($user) {
+            $user->set('email_verified', true);
+            
+            if ($this->Users->save($user)) {
+                $this->Flash->success(__('Email has been verified'));
+            } else {
+                $this->Flash->error(__('Unable to update user account'));
+            }
+        } else {
+            $this->Flash->error(__('Email is already verified'));
         }
 
-        $this->Flash->success(__('Email has been verified'));
-        // TODO: Log user in and redirect to landing
+        // TODO: Log user in and redirect to landing (setup AuthenticationServiceProvider)
     }
 
-    public function resetPassword()
+    // TODO: Refactor this into requestPasswordReset and resetPassword
+    public function requestPasswordReset(UsersMailerService $usersMailer, ?string $token = null)
+    {
+        /*
+        TODO: Setup form
+
+        create ResetPasswordForm that extends EmailForm?
+        create reset password email
+        create another action to handle the reset url? Or handle in this action?
+
+        */
+        $emailForm = new EmailForm();
+
+        if ($this->request->is('post') && $emailForm->execute($this->request->getData())) {
+            // TODO: Use UsersMailerService to send email
+        }
+
+        $this->set(compact('emailForm'));
+    }
+
+    public function handlePasswordReset()
     {
         throw new NotImplementedException();
     }
 
     public function login()
     {
-        // TODO: Template should have link 'Resend verification email' to resendVerificationEmail
         throw new NotImplementedException();
     }
 

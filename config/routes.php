@@ -76,23 +76,37 @@ return function (RouteBuilder $routes): void {
 
         $builder->connect(
             '/logout',
-            ['controller' => 'Users', 'action' => 'login'],
+            ['controller' => 'Users', 'action' => 'logout'],
             ['_name' => 'users:logout'],
+        );
+
+        $builder->connect(
+            '/verify-email',
+            ['controller' => 'Users', 'action' => 'requestEmailVerification'],
+            ['_name' => 'users:requestEmailVerification'],
         );
 
         $builder
             ->connect(
                 '/verify-email/{token}',
-                ['controller' => 'Users', 'action' => 'verifyEmail'],
-                ['_name' => 'users:verifyEmail'],
+                ['controller' => 'Users', 'action' => 'handleEmailVerification'],
+                ['_name' => 'users:handleEmailVerification'],
             )
             ->setPass(['token']);
 
         $builder->connect(
-            '/resend-verification-email',
-            ['controller' => 'Users', 'action' => 'resendVerificationEmail'],
-            ['_name' => 'users:resendVerificationEmail'],
+            '/reset-password',
+            ['controller' => 'Users', 'action' => 'requestPasswordReset'],
+            ['_name' => 'users:requestPasswordReset'],
         );
+
+        $builder
+            ->connect(
+                '/reset-password/{token}',
+                ['controller' => 'Users', 'action' => 'handlePasswordReset'],
+                ['_name' => 'users:handlePasswordReset'],
+            )
+            ->setPass(['token']);
     });
 
     /*
