@@ -53,7 +53,11 @@ class UsersController extends AppController
 
         if ($this->request->is('post')) {
             $form->execute($this->request->getData());
+
+            /** @var string $email */
             $email = $form->getData('email');
+
+            /** @var \App\Model\Entity\User|null */
             $user = $form->getUser();
 
             if ($user?->email_verified) {
@@ -90,6 +94,7 @@ class UsersController extends AppController
             return $this->redirect(['_name' => 'users:requestEmailVerification']);
         }
 
+        /** @var int|null $userId */
         $userId = $jwtPayload->get('sub');
 
         if ($userId === null) {
@@ -97,6 +102,7 @@ class UsersController extends AppController
             return $this->redirect(['_name' => 'users:requestEmailVerification']);
         }
 
+        /** @var \App\Model\Entity\User|null */
         $user = $this->Users->get(primaryKey: $userId, finder: 'emailNotVerified');
 
         if ($user) {
@@ -118,7 +124,10 @@ class UsersController extends AppController
 
         if ($this->request->is('post')) {
             if ($emailForm->execute($this->request->getData())) {
+                /** @var string $email */
                 $email = $emailForm->getData('email');
+
+                /** @var \App\Model\Entity\User|null */
                 $user = $this->Users->find('byEmail', email: $email)->first();
 
                 if ($user) {
@@ -152,6 +161,7 @@ class UsersController extends AppController
             return $this->redirect(['_name' => 'users:requestPasswordReset']);
         }
 
+        /** @var int|null $userId */
         $userId = $jwtPayload->get('sub');
 
         if ($userId === null) {
@@ -163,11 +173,16 @@ class UsersController extends AppController
 
         if ($this->request->is('post')) {
             if ($form->execute($this->request->getData())) {
+                /** @var string $password */
                 $password = $form->getData('password');
+
+                /** @var \App\Model\Entity\User|null $user */
                 $user = $this->Users->get($userId);
 
                 if ($user) {
+                    /** @var string $email */
                     $email = $user->get('email');
+
                     $user->set('password', $password);
 
                     if ($this->Users->save($user)) {

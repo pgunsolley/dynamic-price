@@ -90,9 +90,13 @@ class UserForm extends EmailForm
 
     protected function process(array $data): bool
     {
+        /** @var string $email */
         $email = $data['email'];
+
+        /** @var string $password */
         $password = $data['password'];
 
+        /** @var \App\Model\Entity\User|null $user */
         $user = $this->fetchTable()->find('byEmail', email: $email)->first();
         
         if (!$user) {
