@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Form\Enum;
+namespace App\Form\UserForm\Enum;
 
-enum UserFormResult
+enum Status
 {
     case Pending;
     case Success;

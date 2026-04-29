@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Mailer;
 
 use App\Model\Entity\User;
-use Cake\Http\Exception\NotImplementedException;
 use Cake\Mailer\Mailer;
 
 class UsersMailer extends Mailer
@@ -20,6 +19,10 @@ class UsersMailer extends Mailer
 
     public function resetPassword(User $user, string $token): void
     {
-        throw new NotImplementedException();
+        $this
+            ->setEmailFormat('text')
+            ->setTo($user->email)
+            ->setSubject('Password reset')
+            ->setViewVars('token', $token);
     }
 }

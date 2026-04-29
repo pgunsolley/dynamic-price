@@ -17,7 +17,7 @@ declare(strict_types=1);
 namespace App;
 
 use App\Middleware\HostHeaderMiddleware;
-use App\Service\UsersJwtService;
+use App\Service\JwtService;
 use App\Service\UsersMailerService;
 use Cake\Core\Configure;
 use Cake\Core\ContainerInterface;
@@ -112,7 +112,7 @@ class Application extends BaseApplication
         // Allow your Tables to be dependency injected
         //$container->delegate(new \Cake\ORM\Locator\TableContainer());
         $container
-            ->addShared(UsersJwtService::class)
+            ->addShared(JwtService::class)
             ->addArguments([
                 new StringArgument(Configure::readOrFail('UserJwt.privateKey')),
                 new StringArgument(Configure::readOrFail('UserJwt.publicKey')),
@@ -121,7 +121,7 @@ class Application extends BaseApplication
 
         $container
             ->addShared(UsersMailerService::class)
-            ->addArgument(UsersJwtService::class);
+            ->addArgument(JwtService::class);
     }
 
     /**

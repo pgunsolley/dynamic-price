@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Form;
 
-use App\Form\Enum\UserFormResult;
+use App\Form\UserForm\Enum\Status;
 use App\Model\Entity\User;
 use Cake\Form\Schema;
 use Cake\ORM\Locator\LocatorAwareTrait;
@@ -25,7 +25,7 @@ class UserForm extends EmailForm
 
     private bool $passwordCheckResult = false;
 
-    private UserFormResult $result = UserFormResult::Pending;
+    private Status $status = Status::Pending;
 
     public function getUser(): ?User
     {
@@ -37,13 +37,13 @@ class UserForm extends EmailForm
         return $this->passwordCheckResult;
     }
 
-    public function getResult(): UserFormResult
+    public function getStatus(): Status
     {
         if (!empty($this->getErrors())) {
-            return UserFormResult::ValidationError;
+            return Status::ValidationError;
         }
 
-        return $this->result;
+        return $this->status;
     }
 
     /**
@@ -96,13 +96,19 @@ class UserForm extends EmailForm
         $user = $this->fetchTable()->find('byEmail', email: $email)->first();
         
         if (!$user) {
-            $this->result = UserFormResult::UserNotFound;
+            $this->status = Status::UserNotFound;
             return false;
         }
 
-        $this->user = $user;
         $this->passwordCheckResult = $user->checkPassword($password);
-        $this->result = $this->passwordCheckResult ? UserFormResult::Success : UserFormResult::InvalidPassword;
+
+        if ($this->passwordCheckResult) {
+            $this->user = $user;
+            $this->status = Status::Success;
+        } else {
+            $this->status = Status::InvalidPassword;
+        }
+
         return $this->passwordCheckResult;
     }
 }

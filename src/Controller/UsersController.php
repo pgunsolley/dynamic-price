@@ -3,11 +3,12 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Form\ConfirmPasswordForm;
 use App\Form\EmailForm;
-use App\Form\Enum\UserFormResult;
 use App\Form\UserForm;
+use App\Form\UserForm\Enum\Status;
 use App\Model\Entity\User;
-use App\Service\UsersJwtService;
+use App\Service\JwtService;
 use App\Service\UsersMailerService;
 use Cake\Http\Exception\NotImplementedException;
 use Firebase\JWT\ExpiredException;
@@ -48,34 +49,34 @@ class UsersController extends AppController
 
     public function requestEmailVerification(UsersMailerService $usersMailer)
     {
-        $userForm = new UserForm();
+        $form = new UserForm();
 
         if ($this->request->is('post')) {
-            $userForm->execute($this->request->getData());
-            $email = $userForm->getData('email');
-            $user = $userForm->getUser();
+            $form->execute($this->request->getData());
+            $email = $form->getData('email');
+            $user = $form->getUser();
 
             if ($user?->email_verified) {
                 $this->Flash->error(__('Account is already verified'));
                 // TODO: return redirect to landing
             }
 
-            match ($userForm->getResult()) {
-                UserFormResult::Success             => $this->sendVerificationEmail($usersMailer, $user),
-                UserFormResult::ValidationError     => $this->Flash->error(__('Invalid email or password')),
-                UserFormResult::UserNotFound        => $this->Flash->error(__('No account for {0}', $email)),
-                UserFormResult::InvalidPassword     => $this->Flash->error(__('Password is incorrect')),
-                UserFormResult::Pending             => $this->Flash->error(__('Unable to process request')),
+            match ($form->getStatus()) {
+                Status::Success => $this->sendVerificationEmail($usersMailer, $user),
+                Status::ValidationError => $this->Flash->error(__('Invalid email or password')),
+                Status::UserNotFound => $this->Flash->error(__('No account for {0}', $email)),
+                Status::InvalidPassword => $this->Flash->error(__('Password is incorrect')),
+                Status::Pending => $this->Flash->error(__('Unable to process request')),
             };
         }
 
-        $this->set(compact('userForm'));
+        $this->set(compact('form'));
     }
 
-    public function handleEmailVerification(UsersJwtService $usersJwt, string $token)
+    public function handleEmailVerification(JwtService $jwt, string $token)
     {
         try {
-            $userId = $usersJwt->extractUserId($token);
+            $jwtPayload = $jwt->decodePayload($token);
         } catch (ExpiredException) {
             $this->Flash->error(__('The verification link has expired'));
         } catch (Exception) {
@@ -84,46 +85,110 @@ class UsersController extends AppController
             return $this->redirect(['_name' => 'users:requestEmailVerification']);
         }
 
+        if (!$jwtPayload->check('scope', 'verify_email')) {
+            $this->Flash->error(__('Invalid url'));
+            return $this->redirect(['_name' => 'users:requestEmailVerification']);
+        }
+
+        $userId = $jwtPayload->get('sub');
+
+        if ($userId === null) {
+            $this->Flash->error(__('Unable to verify email'));
+            return $this->redirect(['_name' => 'users:requestEmailVerification']);
+        }
+
         $user = $this->Users->get(primaryKey: $userId, finder: 'emailNotVerified');
 
         if ($user) {
             $user->set('email_verified', true);
-            
+
             if ($this->Users->save($user)) {
                 $this->Flash->success(__('Email has been verified'));
-            } else {
-                $this->Flash->error(__('Unable to update user account'));
+                // TODO: Log user in and redirect
             }
-        } else {
-            $this->Flash->error(__('Email is already verified'));
         }
 
-        // TODO: Log user in and redirect to landing (setup AuthenticationServiceProvider)
+        $this->Flash->error(__('Something went wrong - please try again'));
+        return $this->redirect(['_name' => 'users:requestEmailVerification']);
     }
 
-    // TODO: Refactor this into requestPasswordReset and resetPassword
     public function requestPasswordReset(UsersMailerService $usersMailer, ?string $token = null)
     {
-        /*
-        TODO: Setup form
-
-        create ResetPasswordForm that extends EmailForm?
-        create reset password email
-        create another action to handle the reset url? Or handle in this action?
-
-        */
         $emailForm = new EmailForm();
 
-        if ($this->request->is('post') && $emailForm->execute($this->request->getData())) {
-            // TODO: Use UsersMailerService to send email
+        if ($this->request->is('post')) {
+            if ($emailForm->execute($this->request->getData())) {
+                $email = $emailForm->getData('email');
+                $user = $this->Users->find('byEmail', email: $email)->first();
+
+                if ($user) {
+                    $usersMailer->resetPassword($user);
+                    $this->Flash->success(__('An email has been sent to {0}', $email));
+                } else {
+                    $this->Flash->error(__('No account for {0}', $email));
+                }
+            } else {
+                $this->Flash->error(__('Invalid email'));
+            }
         }
 
         $this->set(compact('emailForm'));
     }
 
-    public function handlePasswordReset()
+    public function handlePasswordReset(JwtService $jwt, string $token)
     {
-        throw new NotImplementedException();
+        try {
+            $jwtPayload = $jwt->decodePayload($token);
+        } catch (ExpiredException) {
+            $this->Flash->error(__('The password reset link has expired'));
+        } catch (Exception) {
+            $this->Flash->error(__('Unable to reset password'));
+        } finally {
+            return $this->redirect(['_name' => 'users:requestPasswordReset']);
+        }
+
+        if (!$jwtPayload->check('scope', 'reset_password')) {
+            $this->Flash->error(__('Invalid url'));
+            return $this->redirect(['_name' => 'users:requestPasswordReset']);
+        }
+
+        $userId = $jwtPayload->get('sub');
+
+        if ($userId === null) {
+            $this->Flash->error(__(''));
+            return $this->redirect(['_name' => 'users:requestPasswordReset']);
+        }
+
+        $form = new ConfirmPasswordForm();
+
+        if ($this->request->is('post')) {
+            if ($form->execute($this->request->getData())) {
+                $password = $form->getData('password');
+                $user = $this->Users->get($userId);
+
+                if ($user) {
+                    $email = $user->get('email');
+                    $user->set('password', $password);
+
+                    if ($this->Users->save($user)) {
+                        $this->Flash->success(__('Password has been reset for {0}', $email));
+                        return $this->redirect(['_name' => 'users:login']);
+                    }
+
+                    $this->Flash->error(__('Unable to reset password for {0}', $email));
+                    return $this->redirect(['_name' => 'users:requestPasswordReset']);
+                } else {
+                    // Should not likely occur unless a user account is deleted between the time
+                    // a user requests a pasword reset email and follows the link from the email
+                    $this->Flash->error(__('Account not found'));
+                    return $this->redirect(['_name' => 'users:requestPasswordReset']);
+                }
+            } else {
+                $this->Flash->error(__('Password is invalid'));
+            }
+        }
+
+        $this->set(compact('form'));
     }
 
     public function login()

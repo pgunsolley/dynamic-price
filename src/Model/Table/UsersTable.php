@@ -95,4 +95,9 @@ class UsersTable extends Table
     {
         return $query->where(['email_verified' => false]);
     }
+
+    public function findEmailVerified(SelectQuery $query): SelectQuery
+    {
+        return $query->where(['email_verified' => true]);
+    }
 }
