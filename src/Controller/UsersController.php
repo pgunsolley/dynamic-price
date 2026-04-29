@@ -10,9 +10,9 @@ use App\Form\UserForm\Enum\Status;
 use App\Model\Entity\User;
 use App\Service\JwtService;
 use App\Service\UsersMailerService;
-use Cake\Http\Exception\NotImplementedException;
 use Firebase\JWT\ExpiredException;
 use Exception;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Users Controller
@@ -25,6 +25,19 @@ class UsersController extends AppController
     {
         $usersMailer->emailVerification($user);
         $this->Flash->success(__('A verification email has been sent to {0}', $user->email));
+    }
+
+    public function initialize(): void
+    {
+        parent::initialize();
+        $this->Authentication->allowUnauthenticated([
+            'login',
+            'register',
+            'requestEmailVerification',
+            'handleEmailVerification',
+            'requestPasswordReset',
+            'handlePasswordReset',
+        ]);
     }
 
     public function register(UsersMailerService $usersMailer)
@@ -54,7 +67,7 @@ class UsersController extends AppController
         if ($this->request->is('post')) {
             $form->execute($this->request->getData());
 
-            /** @var string $email */
+            /** @var string $email The email field value, regardless if invalid */
             $email = $form->getData('email');
 
             /** @var \App\Model\Entity\User|null */
@@ -83,14 +96,14 @@ class UsersController extends AppController
             $jwtPayload = $jwt->decodePayload($token);
         } catch (ExpiredException) {
             $this->Flash->error(__('The verification link has expired'));
+            return $this->redirect(['_name' => 'users:requestEmailVerification']);
         } catch (Exception) {
             $this->Flash->error(__('Unable to verify email'));
-        } finally {
             return $this->redirect(['_name' => 'users:requestEmailVerification']);
         }
 
         if (!$jwtPayload->check('scope', 'verify_email')) {
-            $this->Flash->error(__('Invalid url'));
+            $this->Flash->error(__('Invalid url - please try again'));
             return $this->redirect(['_name' => 'users:requestEmailVerification']);
         }
 
@@ -98,7 +111,7 @@ class UsersController extends AppController
         $userId = $jwtPayload->get('sub');
 
         if ($userId === null) {
-            $this->Flash->error(__('Unable to verify email'));
+            $this->Flash->error(__('Url is malformed - please try again'));
             return $this->redirect(['_name' => 'users:requestEmailVerification']);
         }
 
@@ -124,7 +137,7 @@ class UsersController extends AppController
 
         if ($this->request->is('post')) {
             if ($emailForm->execute($this->request->getData())) {
-                /** @var string $email */
+                /** @var string $email The validated email field value */
                 $email = $emailForm->getData('email');
 
                 /** @var \App\Model\Entity\User|null */
@@ -150,14 +163,14 @@ class UsersController extends AppController
             $jwtPayload = $jwt->decodePayload($token);
         } catch (ExpiredException) {
             $this->Flash->error(__('The password reset link has expired'));
+            return $this->redirect(['_name' => 'users:requestPasswordReset']);
         } catch (Exception) {
             $this->Flash->error(__('Unable to reset password'));
-        } finally {
             return $this->redirect(['_name' => 'users:requestPasswordReset']);
         }
 
         if (!$jwtPayload->check('scope', 'reset_password')) {
-            $this->Flash->error(__('Invalid url'));
+            $this->Flash->error(__('Invalid url - please try again'));
             return $this->redirect(['_name' => 'users:requestPasswordReset']);
         }
 
@@ -165,7 +178,7 @@ class UsersController extends AppController
         $userId = $jwtPayload->get('sub');
 
         if ($userId === null) {
-            $this->Flash->error(__(''));
+            $this->Flash->error(__('Url is malformed - please try again'));
             return $this->redirect(['_name' => 'users:requestPasswordReset']);
         }
 
@@ -208,11 +221,41 @@ class UsersController extends AppController
 
     public function login()
     {
-        throw new NotImplementedException();
+        $form = new UserForm();
+
+        if ($this->request->is('post')) {
+            if ($form->execute($this->request->getData())) {
+                // Form Status is ::Success, indicating:
+                // Form data validation passed,
+                // User record is found by email,
+                // Password check passed,
+                // User record is guaranteed not null
+                $user = $form->getUser();
+
+                if ($user->email_verified) {
+                    $this->Authentication->setIdentity($user);
+                    return $this->redirect([]); // TODO: Redirect to landing
+                }
+            }
+
+            /** @var string $email */
+            $email = $form->getData('email');
+
+            match ($form->getStatus()) {
+                Status::Success => $this->Flash->error(__('Email {0} is not verified', $email)),
+                Status::ValidationError => $this->Flash->error(__('Invalid email or password')),
+                Status::UserNotFound => $this->Flash->error(__('No account for {0}', $email)),
+                Status::InvalidPassword => $this->Flash->error(__('Password is incorrect')),
+                Status::Pending => $this->Flash->error(__('Unable to process request')),
+            };
+        }
+
+        $this->set(compact('userForm'));
     }
 
     public function logout()
     {
-        throw new NotImplementedException();
+        $this->Authentication->logout();
+        return $this->redirect(['_name' => 'users:login']);
     }
 }

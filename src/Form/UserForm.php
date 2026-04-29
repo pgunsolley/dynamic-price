@@ -19,8 +19,6 @@ class UserForm extends EmailForm
 {
     use LocatorAwareTrait;
 
-    protected string $defaultTable = 'Users';
-
     private ?User $user = null;
 
     private bool $passwordCheckResult = false;
@@ -97,7 +95,7 @@ class UserForm extends EmailForm
         $password = $data['password'];
 
         /** @var \App\Model\Entity\User|null $user */
-        $user = $this->fetchTable()->find('byEmail', email: $email)->first();
+        $user = $this->fetchTable('Users')->find('byEmail', email: $email)->first();
         
         if (!$user) {
             $this->status = Status::UserNotFound;
