@@ -19,7 +19,7 @@ class UsersMailerService
         $jwt = $this->usersJwt->encode(
             user: $user,
             additionalClaims: [
-                'scope' => 'verify_email',
+                'scope' => 'handle_email_verification',
             ],
         );
 
@@ -31,7 +31,7 @@ class UsersMailerService
         $jwt = $this->usersJwt->encode(
             user: $user,
             additionalClaims: [
-                'scope' => 'reset_password',
+                'scope' => 'handle_password_reset',
             ],
         );
 

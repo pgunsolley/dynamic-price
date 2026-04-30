@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
+use Cake\Database\StatementInterface;
 use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
@@ -99,5 +100,14 @@ class UsersTable extends Table
     public function findEmailVerified(SelectQuery $query): SelectQuery
     {
         return $query->where(['email_verified' => true]);
+    }
+
+    public function setEmailVerified(string $email): StatementInterface
+    {
+        return $this
+            ->updateQuery()
+            ->set('email_verified', true)
+            ->where(['email' => $email])
+            ->execute();
     }
 }

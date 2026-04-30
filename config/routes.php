@@ -81,14 +81,14 @@ return function (RouteBuilder $routes): void {
         );
 
         $builder->connect(
-            '/verify-email',
+            '/verify-email/{token}',
             ['controller' => 'Users', 'action' => 'requestEmailVerification'],
             ['_name' => 'users:requestEmailVerification'],
         );
 
         $builder
             ->connect(
-                '/verify-email/{token}',
+                '/verify-email/process/{token}',
                 ['controller' => 'Users', 'action' => 'handleEmailVerification'],
                 ['_name' => 'users:handleEmailVerification'],
             )
@@ -102,7 +102,7 @@ return function (RouteBuilder $routes): void {
 
         $builder
             ->connect(
-                '/reset-password/{token}',
+                '/reset-password/process/{token}',
                 ['controller' => 'Users', 'action' => 'handlePasswordReset'],
                 ['_name' => 'users:handlePasswordReset'],
             )
