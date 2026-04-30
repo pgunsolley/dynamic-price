@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Form\ConfirmPasswordForm;
+use App\Form\PasswordConfirmationForm;
 use App\Form\EmailForm;
 use App\Form\UserForm;
 use App\Form\UserForm\Enum\Status;
@@ -46,6 +46,7 @@ class UsersController extends AppController
 
     public function register(UsersMailerService $usersMailer)
     {
+        // TODO: Add a confirm_password virtual field to model and form
         $user = $this->Users->newEmptyEntity();
 
         if ($this->request->is('post')) {
@@ -185,7 +186,7 @@ class UsersController extends AppController
             return $this->redirectToLogin();
         }
 
-        $form = new ConfirmPasswordForm();
+        $form = new PasswordConfirmationForm();
 
         if ($this->request->is('post')) {
             if ($form->execute($this->request->getData())) {

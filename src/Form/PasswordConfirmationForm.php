@@ -10,7 +10,7 @@ use Cake\Validation\Validator;
 /**
  * PasswordReset Form.
  */
-class ConfirmPasswordForm extends Form
+class PasswordConfirmationForm extends Form
 {
     /**
      * Builds the schema for the modelless form
@@ -22,7 +22,7 @@ class ConfirmPasswordForm extends Form
     {
         return $schema
             ->addField('password', 'password')
-            ->addField('confirm_password', 'password');
+            ->addField('password_confirm', 'password');
     }
 
     /**
@@ -54,7 +54,7 @@ class ConfirmPasswordForm extends Form
             
         $validator
             ->sameAs(
-                field: 'confirm_password',
+                field: 'password_confirm',
                 secondField: 'password',
                 message: 'Password does not match',
             );
