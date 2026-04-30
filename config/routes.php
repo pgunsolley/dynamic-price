@@ -80,11 +80,13 @@ return function (RouteBuilder $routes): void {
             ['_name' => 'users:logout'],
         );
 
-        $builder->connect(
-            '/verify-email/{token}',
-            ['controller' => 'Users', 'action' => 'requestEmailVerification'],
-            ['_name' => 'users:requestEmailVerification'],
-        );
+        $builder
+            ->connect(
+                '/verify-email/{token}',
+                ['controller' => 'Users', 'action' => 'requestEmailVerification'],
+                ['_name' => 'users:requestEmailVerification'],
+            )
+            ->setPass(['token']);
 
         $builder
             ->connect(
