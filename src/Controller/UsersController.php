@@ -243,7 +243,7 @@ class UsersController extends AppController
             };
         }
 
-        $this->set(compact('userForm'));
+        $this->set(compact('form'));
     }
 
     public function logout()
