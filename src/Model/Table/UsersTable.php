@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\Database\StatementInterface;
+use Authentication\PasswordHasher\DefaultPasswordHasher;
+use Cake\I18n\DateTime;
 use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
@@ -102,12 +103,38 @@ class UsersTable extends Table
         return $query->where(['email_verified' => true]);
     }
 
-    public function setEmailVerified(string $email): StatementInterface
+    public function updateEmailVerified(int $userId, bool $value = true): bool
     {
-        return $this
+        $stmt = $this
             ->updateQuery()
-            ->set('email_verified', true)
-            ->where(['email' => $email])
+            ->set([
+                'email_verified' => $value,
+                'modified' => DateTime::now(),
+            ])
+            ->where(['id' => $userId])
             ->execute();
+
+        return $stmt->rowCount() === 1;
+    }
+
+    public function updatePassword(int $userId, string $password): bool
+    {
+        $passwordHasher = new DefaultPasswordHasher();
+        $hashedPassword = $passwordHasher->hash($password);
+
+        if (!is_string($hashedPassword)) {
+            return false;
+        }
+
+        $stmt = $this
+            ->updateQuery()
+            ->set([
+                'password' => $hashedPassword,
+                'modified' => DateTime::now(),
+            ])
+            ->where(['id' => $userId])
+            ->execute();
+
+        return $stmt->rowCount() === 1;
     }
 }

@@ -126,20 +126,12 @@ class UsersController extends AppController
             return $this->redirectToLogin();
         }
 
-        // TODO: Rewrite logic to use an update query instead of fetching the entity first
-        /** @var \App\Model\Entity\User|null */
-        $user = $this->Users->get(primaryKey: $userId, finder: 'emailNotVerified');
-
-        if ($user) {
-            $user->set('email_verified', true);
-
-            if ($this->Users->save($user)) {
-                $this->Flash->success(__('Email has been verified'));
-                // TODO: Log user in and redirect
-            }
+        if ($this->Users->updateEmailVerified($userId)) {
+            $this->Flash->success(__('Your account has been activated'));
+        } else {
+            $this->Flash->error(__('Something went wrong - please try again'));
         }
 
-        $this->Flash->error(__('Something went wrong - please try again'));
         return $this->redirectToLogin();
     }
 
@@ -197,32 +189,14 @@ class UsersController extends AppController
 
         if ($this->request->is('post')) {
             if ($form->execute($this->request->getData())) {
-                /** @var string $password */
                 $password = $form->getData('password');
 
-                // TODO: Rewrite logic to update the record intead of fetching an entity first
-                /** @var \App\Model\Entity\User|null $user */
-                $user = $this->Users->get($userId);
-
-                if ($user) {
-                    /** @var string $email */
-                    $email = $user->get('email');
-
-                    $user->set('password', $password);
-
-                    if ($this->Users->save($user)) {
-                        $this->Flash->success(__('Password has been reset for {0}', $email));
-                        return $this->redirectToLogin();
-                    }
-
-                    $this->Flash->error(__('Unable to reset password for {0}', $email));
-                    return $this->redirectToLogin();
-                } else {
-                    // Should not likely occur unless a user account is deleted between the time
-                    // a user requests a pasword reset email and follows the link from the email
-                    $this->Flash->error(__('Account not found'));
+                if ($this->Users->updatePassword($userId, $password)) {
+                    $this->Flash->success(__('Password has been reset'));
                     return $this->redirectToLogin();
                 }
+
+                $this->Flash->error(__('Unable to reset password'));
             } else {
                 $this->Flash->error(__('Password is invalid'));
             }
