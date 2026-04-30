@@ -53,7 +53,7 @@ class UsersController extends AppController
 
             if ($this->Users->save($user)) {
                 $this->sendVerificationEmail($usersMailer, $user);
-                $this->redirect(['_name' => 'users:login']);
+                return $this->redirectToLogin();
             } else {
                 $this->Flash->error(__('Unable to register new account'));
             }
@@ -259,14 +259,14 @@ class UsersController extends AppController
                         ],
                     ),
                 ]);
-            } else {
-                match ($form->getStatus()) {
-                    Status::ValidationError => $this->Flash->error(__('Invalid email or password')),
-                    Status::UserNotFound => $this->Flash->error(__('No account for {0}', $email)),
-                    Status::InvalidPassword => $this->Flash->error(__('Password is incorrect')),
-                    Status::Pending => $this->Flash->error(__('Unable to process request')),
-                };
             }
+
+            match ($form->getStatus()) {
+                Status::ValidationError => $this->Flash->error(__('Invalid email or password')),
+                Status::UserNotFound => $this->Flash->error(__('No account for {0}', $email)),
+                Status::InvalidPassword => $this->Flash->error(__('Password is incorrect')),
+                Status::Pending => $this->Flash->error(__('Unable to process request')),
+            };
         }
 
         $this->set(compact('userForm'));
@@ -275,6 +275,6 @@ class UsersController extends AppController
     public function logout()
     {
         $this->Authentication->logout();
-        return $this->redirect(['_name' => 'users:login']);
+        return $this->redirectToLogin();
     }
 }
