@@ -9,6 +9,7 @@
         <legend><?= __('Please enter your email and password') ?></legend>
         <?= $this->Form->control('email') ?>
         <?= $this->Form->control('password') ?>
+        <?= $this->Form->control('confirm_password', ['type' => 'password']) ?>
     </fieldset>
     <?= $this->Form->button(__('Register')) ?>
     <?= $this->Form->end() ?>

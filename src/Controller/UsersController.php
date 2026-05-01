@@ -46,11 +46,16 @@ class UsersController extends AppController
 
     public function register(UsersMailerService $usersMailer)
     {
-        // TODO: Add a confirm_password virtual field to model and form
         $user = $this->Users->newEmptyEntity();
 
         if ($this->request->is('post')) {
-            $this->Users->patchEntity($user, $this->request->getData());
+            $this->Users->patchEntity(
+                entity: $user,
+                data: $this->request->getData(),
+                options: [
+                    'validate' => 'withPasswordConfirmation',
+                ],
+            );
 
             if ($this->Users->save($user)) {
                 $this->sendVerificationEmail($usersMailer, $user);

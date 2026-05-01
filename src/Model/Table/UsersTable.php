@@ -74,6 +74,13 @@ class UsersTable extends Table
         return $validator;
     }
 
+    public function validationWithPasswordConfirmation(Validator $validator): Validator
+    {
+        return $this
+            ->validationDefault($validator)
+            ->sameAs('confirm_password', 'password');
+    }
+
     /**
      * Returns a rules checker object that will be used for validating
      * application integrity.

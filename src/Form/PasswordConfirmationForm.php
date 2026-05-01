@@ -22,7 +22,7 @@ class PasswordConfirmationForm extends Form
     {
         return $schema
             ->addField('password', 'password')
-            ->addField('password_confirm', 'password');
+            ->addField('confirm_password', 'password');
     }
 
     /**
@@ -54,7 +54,7 @@ class PasswordConfirmationForm extends Form
             
         $validator
             ->sameAs(
-                field: 'password_confirm',
+                field: 'confirm_password',
                 secondField: 'password',
                 message: 'Password does not match',
             );
