@@ -12,4 +12,5 @@
     </fieldset>
     <?= $this->Form->button(__('Login')) ?>
     <?= $this->Form->end() ?>
+    <?= $this->Html->link('Forgot your password', ['_name' => 'users:requestPasswordReset']) ?>
 </div>

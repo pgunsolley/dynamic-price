@@ -117,9 +117,8 @@ class Application extends BaseApplication
         $container
             ->addShared(JwtService::class)
             ->addArguments([
-                new StringArgument(Configure::readOrFail('UserJwt.privateKey')),
-                new StringArgument(Configure::readOrFail('UserJwt.publicKey')),
                 new StringArgument(Configure::read('UserJwt.algorithm')),
+                new StringArgument(Configure::readOrFail('UserJwt.key')),
             ]);
 
         $container

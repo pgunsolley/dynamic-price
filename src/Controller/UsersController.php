@@ -84,9 +84,9 @@ class UsersController extends AppController
             return $this->redirectToLogin();
         }
 
-        $submit = $this->request->getQuery('submit');
+        $submit = (int)$this->request->getQuery('submit');
 
-        if ($submit === '1') {
+        if ($submit === 1) {
             /** @var int|null $userId */
             $userId = $jwtPayload->get('sub');
 
@@ -143,19 +143,20 @@ class UsersController extends AppController
 
     public function requestPasswordReset(UsersMailerService $usersMailer)
     {
-        $emailForm = new EmailForm();
+        $form = new EmailForm();
 
         if ($this->request->is('post')) {
-            if ($emailForm->execute($this->request->getData())) {
+            if ($form->execute($this->request->getData())) {
                 /** @var string $email The validated email field value */
-                $email = $emailForm->getData('email');
+                $email = $form->getData('email');
 
                 /** @var \App\Model\Entity\User|null */
                 $user = $this->Users->find('byEmail', email: $email)->first();
 
                 if ($user) {
                     $usersMailer->resetPassword($user);
-                    $this->Flash->success(__('An email has been sent to {0}', $email));
+                    $this->Flash->success(__('A password reset email has been sent to {0}', $email));
+                    return $this->redirectToLogin();
                 } else {
                     $this->Flash->error(__('No account for {0}', $email));
                 }
@@ -164,7 +165,7 @@ class UsersController extends AppController
             }
         }
 
-        $this->set(compact('emailForm'));
+        $this->set(compact('form'));
     }
 
     public function handlePasswordReset(JwtService $jwt, string $token)
@@ -229,7 +230,6 @@ class UsersController extends AppController
                     return $this->redirect([]); // TODO: Redirect to landing
                 }
 
-                $this->Flash->error(__('Email {0} is not verified', $email));
                 return $this->redirect([
                     '_name' => 'users:requestEmailVerification',
                     $jwt->encode(
