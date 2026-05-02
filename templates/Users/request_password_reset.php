@@ -11,4 +11,5 @@
     </fieldset>
     <?= $this->Form->button(__('Send password reset email')) ?>
     <?= $this->Form->end() ?>
+    <?= $this->Html->link(__('Go back'), ['_name' => 'users:login']) ?>
 </div>

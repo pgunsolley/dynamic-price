@@ -11,7 +11,10 @@
         "cakephp/migrations": "^5.0",
         "cakephp/plugin-installer": "^2.0",
         "firebase/php-jwt": "^7.0",
-        "mobiledetect/mobiledetectlib": "^4.8.03"
+        "mailgun/mailgun-php": "^4.5",
+        "mobiledetect/mobiledetectlib": "^4.8.03",
+        "nyholm/psr7": "^1.8",
+        "symfony/http-client": "^8.0"
     },
     "require-dev": {
         "cakephp/bake": "^3.6",
@@ -40,7 +43,8 @@
     "config": {
         "allow-plugins": {
             "cakephp/plugin-installer": true,
-            "dealerdirect/phpcodesniffer-composer-installer": true
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "php-http/discovery": true
         },
         "platform-check": true,
         "sort-packages": true

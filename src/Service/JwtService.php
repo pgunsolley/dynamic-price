@@ -20,7 +20,7 @@ class JwtService
             payload: [
                 'iss' => 'dynamic-price',
                 'sub' => $user->id,
-                'exp' => $expiration ?? time() + (60 * 60),
+                'exp' => $expiration ?? time() + (60 * 2),
             ] + $additionalClaims,
             key: $this->key,
             alg: $this->algorithm,
