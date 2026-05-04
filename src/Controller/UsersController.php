@@ -34,6 +34,7 @@ class UsersController extends AppController
     public function initialize(): void
     {
         parent::initialize();
+
         $this->Authentication->allowUnauthenticated([
             'login',
             'register',
@@ -41,6 +42,14 @@ class UsersController extends AppController
             'handleEmailVerification',
             'requestPasswordReset',
             'handlePasswordReset',
+        ]);
+
+        $this->loadComponent('RecaptchaV3.RecaptchaV3', [
+            'actions' => [
+                'register',
+                'login',
+                'requestPasswordReset',
+            ],
         ]);
     }
 
@@ -217,6 +226,9 @@ class UsersController extends AppController
         $form = new UserForm();
 
         if ($this->request->is('post')) {
+            // TODO: Check RecaptchaV3 client response
+            dd($this->request->getData());
+
             /** @var string $email */
             $email = $this->request->getData('email');
 

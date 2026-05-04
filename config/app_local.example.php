@@ -95,6 +95,11 @@ return [
         ],
     ],
 
+    /*
+     * Define JWT secrets.
+     * 
+     * JWT is used for specific authenticated requests (password reset, email verification, etc)
+     */
     'UserJwt' => [
         'publicKey' => '',
         'privateKey' => '',
