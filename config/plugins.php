@@ -13,4 +13,5 @@ return [
     ],
     'Authentication' => [],
     'RecaptchaV3' => [],
+    'Mailgun' => [],
 ];

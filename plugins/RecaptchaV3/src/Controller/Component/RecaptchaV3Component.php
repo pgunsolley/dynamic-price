@@ -6,6 +6,10 @@ namespace RecaptchaV3\Controller\Component;
 use RecaptchaV3\Service\RecaptchaV3Service;
 use Cake\Controller\Component;
 use Cake\Controller\ComponentRegistry;
+use Cake\Event\EventInterface;
+use Cake\Http\ServerRequest;
+use Override;
+use RecaptchaV3\Controller\Component\RecaptchaV3\ActionConfigurationSet;
 use RecaptchaV3\VerificationResult;
 
 /**
@@ -13,9 +17,7 @@ use RecaptchaV3\VerificationResult;
  */
 class RecaptchaV3Component extends Component
 {
-    protected array $_defaultConfig = [
-        'setSiteKeyForActions' => [],
-    ];
+    public readonly ActionConfigurationSet $actions;
 
     public function __construct(
         ComponentRegistry $registry,
@@ -25,6 +27,13 @@ class RecaptchaV3Component extends Component
         return parent::__construct($registry, $config);
     }
 
+    #[Override]
+    public function initialize(array $config): void
+    {
+        parent::initialize($config);
+        $this->actions = new ActionConfigurationSet([]);
+    }
+
     public function check(callable $handler): bool
     {
         return $this->getResult()->check($handler);
@@ -32,7 +41,7 @@ class RecaptchaV3Component extends Component
 
     public function getResult(): ?VerificationResult
     {
-        return $this->getController()->getRequest()->getAttribute('recaptchaV3Result');
+        return $this->getRequest()->getAttribute('recaptchaV3Result');
     }
 
     public function getService(): RecaptchaV3Service
@@ -47,12 +56,37 @@ class RecaptchaV3Component extends Component
         ]);
     }
 
+    private function getRequest(): ServerRequest
+    {
+        return $this->getController()->getRequest();
+    }
+
+    private function getCurrentAction(): string
+    {
+        return $this->getRequest()->getParam('action');
+    }
+
+    public function currentActionIsConfigured()
+    {
+        return $this->actions->exists($this->getCurrentAction());
+    }
+
+    public function beforeFilter(EventInterface $event)
+    {
+        if ($this->getRequest()->is('post') && $this->currentActionIsConfigured()) {
+            $config = $this->actions->get($this->getCurrentAction());
+            $handler = $config->getHandler();
+
+            if (!$this->check($handler)) {
+                $event->stopPropagation();
+                $this->getController()->redirect($config->getOnFailRedirect());
+            }
+        }
+    }
+
     public function beforeRender()
     {
-        $actions = $this->getConfig('setSiteKeyForActions');
-        $currentAction = $this->getController()->getRequest()->getParam('action');
-
-        if (in_array($currentAction, $actions)) {
+        if ($this->currentActionIsConfigured()) {
             $this->setSiteKey();
         }
     }

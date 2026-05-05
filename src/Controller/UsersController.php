@@ -11,6 +11,8 @@ use App\Service\JwtService;
 use App\Service\UsersMailerService;
 use Firebase\JWT\ExpiredException;
 use Exception;
+use RecaptchaV3\Controller\Component\RecaptchaV3\ActionConfiguration;
+use RecaptchaV3\Controller\Component\RecaptchaV3\ActionConfigurationSet;
 
 /**
  * Users Controller
@@ -38,12 +40,35 @@ class UsersController extends AppController
             'handlePasswordReset',
         ]);
 
-        $this->loadComponent('RecaptchaV3.RecaptchaV3', [
-            'setSiteKeyForActions' => [
-                'login',
-                'register',
-                'requestPasswordReset',
-            ],
+        $this->loadComponent('RecaptchaV3.RecaptchaV3');
+        $this->RecaptchaV3->actions->add([
+            new ActionConfiguration(
+                action: 'login',
+                handler: fn(array $res) =>
+                    $res['success'] 
+                        && $res['score'] > 0.8
+                        && $res['action'] === 'logins'
+                ,
+                onFailRedirect: ['_name' => 'users:login'],
+            ),
+            new ActionConfiguration(
+                action: 'register',
+                handler: fn(array $res) =>
+                    $res['success'] 
+                        && $res['score'] > 0.8
+                        && $res['action'] === 'register'
+                ,
+                onFailRedirect: ['_name' => 'users:login'],
+            ),
+            new ActionConfiguration(
+                action: 'requestPasswordReset',
+                handler: fn(array $res) =>
+                    $res['success'] 
+                        && $res['score'] > 0.8
+                        && $res['action'] === 'requestPasswordReset'
+                ,
+                onFailRedirect: ['_name' => 'users:login'],
+            ),
         ]);
     }
 
@@ -52,11 +77,6 @@ class UsersController extends AppController
         $user = $this->Users->newEmptyEntity();
 
         if ($this->request->is('post')) {
-            if (!$this->RecaptchaV3->check(fn(array $res) => $res['success'] && $res['score'] > 0.8)) {
-                $this->Flash->error(__('Recaptcha failed'));
-                return $this->redirectToLogin();
-            }
-
             $this->Users->patchEntity(
                 entity: $user,
                 data: $this->request->getData(),
@@ -155,11 +175,6 @@ class UsersController extends AppController
         $form = new EmailForm();
 
         if ($this->request->is('post')) {
-            if (!$this->RecaptchaV3->check(fn(array $res) => $res['success'] && $res['score'] > 0.8)) {
-                $this->Flash->error(__('Recaptcha failed'));
-                return $this->redirectToLogin();
-            }
-
             if ($form->execute($this->request->getData())) {
                 /** @var string $email The validated email field value */
                 $email = $form->getData('email');
@@ -231,11 +246,6 @@ class UsersController extends AppController
         $form = new UserForm();
 
         if ($this->request->is('post')) {
-            if (!$this->RecaptchaV3->check(fn(array $res) => $res['success'] && $res['score'] > 0.8)) {
-                $this->Flash->error(__('Recaptcha failed'));
-                return $this->redirectToLogin();
-            }
-
             /** @var string $email */
             $email = $this->request->getData('email');
 

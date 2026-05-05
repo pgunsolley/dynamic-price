@@ -14,8 +14,6 @@ namespace RecaptchaV3;
  *   "hostname": string,         // the hostname of the site where the reCAPTCHA was solved
  *   "error-codes": [...]        // optional
  * }
- *
- * This class is to help consumers when inspecting the result
  */
 class VerificationResult
 {
