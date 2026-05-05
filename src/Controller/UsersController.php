@@ -17,15 +17,10 @@ use Exception;
  * Users Controller
  *
  * @property \App\Model\Table\UsersTable $Users
+ * @property \RecaptchaV3\Controller\Component\RecaptchaV3Component $RecaptchaV3
  */
 class UsersController extends AppController
 {
-    private function sendVerificationEmail(UsersMailerService $usersMailer, User $user): void
-    {
-        $usersMailer->emailVerification($user);
-        $this->Flash->success(__('A verification email has been sent to {0}', $user->email));
-    }
-
     private function redirectToLogin()
     {
         return $this->redirect(['_name' => 'users:login']);
@@ -44,13 +39,7 @@ class UsersController extends AppController
             'handlePasswordReset',
         ]);
 
-        $this->loadComponent('RecaptchaV3.RecaptchaV3', [
-            'actions' => [
-                'register',
-                'login',
-                'requestPasswordReset',
-            ],
-        ]);
+        $this->loadComponent('RecaptchaV3.RecaptchaV3');
     }
 
     public function register(UsersMailerService $usersMailer)
@@ -58,6 +47,11 @@ class UsersController extends AppController
         $user = $this->Users->newEmptyEntity();
 
         if ($this->request->is('post')) {
+            if (!$this->RecaptchaV3->check(fn(array $res) => $res['success'] && $res['score'] > 0.8)) {
+                $this->Flash->error(__('Recaptcha failed'));
+                return $this->redirectToLogin();
+            }
+
             $this->Users->patchEntity(
                 entity: $user,
                 data: $this->request->getData(),
@@ -67,13 +61,15 @@ class UsersController extends AppController
             );
 
             if ($this->Users->save($user)) {
-                $this->sendVerificationEmail($usersMailer, $user);
+                $usersMailer->emailVerification($user);
+                $this->Flash->success(__('A verification email has been sent to {0}', $user->email));
                 return $this->redirectToLogin();
             } else {
                 $this->Flash->error(__('Unable to register new account'));
             }
         }
 
+        $this->RecaptchaV3->setSiteKey();
         $this->set(compact('user'));
     }
 
@@ -155,6 +151,11 @@ class UsersController extends AppController
         $form = new EmailForm();
 
         if ($this->request->is('post')) {
+            if (!$this->RecaptchaV3->check(fn(array $res) => $res['success'] && $res['score'] > 0.8)) {
+                $this->Flash->error(__('Recaptcha failed'));
+                return $this->redirectToLogin();
+            }
+
             if ($form->execute($this->request->getData())) {
                 /** @var string $email The validated email field value */
                 $email = $form->getData('email');
@@ -174,6 +175,7 @@ class UsersController extends AppController
             }
         }
 
+        $this->RecaptchaV3->setSiteKey();
         $this->set(compact('form'));
     }
 
@@ -226,8 +228,10 @@ class UsersController extends AppController
         $form = new UserForm();
 
         if ($this->request->is('post')) {
-            // TODO: Check RecaptchaV3 client response
-            dd($this->request->getData());
+            if (!$this->RecaptchaV3->check(fn(array $res) => $res['success'] && $res['score'] > 0.8)) {
+                $this->Flash->error(__('Recaptcha failed'));
+                return $this->redirectToLogin();
+            }
 
             /** @var string $email */
             $email = $this->request->getData('email');
@@ -261,6 +265,7 @@ class UsersController extends AppController
             };
         }
 
+        $this->RecaptchaV3->setSiteKey();
         $this->set(compact('form'));
     }
 

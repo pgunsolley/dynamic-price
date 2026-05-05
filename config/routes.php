@@ -23,6 +23,7 @@
 
 use Cake\Routing\Route\DashedRoute;
 use Cake\Routing\RouteBuilder;
+use RecaptchaV3\Middleware\RecaptchaV3Middleware;
 
 /*
  * This file is loaded in the context of the `Application` class.
@@ -50,6 +51,8 @@ return function (RouteBuilder $routes): void {
     $routes->setRouteClass(DashedRoute::class);
 
     $routes->scope('/', function (RouteBuilder $builder): void {
+        $builder->registerMiddleware('recaptchaV3', RecaptchaV3Middleware::class);
+
         /*
          * Here, we are connecting '/' (base path) to a controller called 'Pages',
          * its action called 'display', and we pass a param to select the view file
@@ -62,17 +65,21 @@ return function (RouteBuilder $routes): void {
          */
         $builder->connect('/pages/*', 'Pages::display');
 
-        $builder->connect(
-            '/register',
-            ['controller' => 'Users', 'action' => 'register'],
-            ['_name' => 'users:register'],
-        );
+        $builder
+            ->connect(
+                '/register',
+                ['controller' => 'Users', 'action' => 'register'],
+                ['_name' => 'users:register'],
+            )
+            ->setMiddleware(['recaptchaV3']);
         
-        $builder->connect(
-            '/login',
-            ['controller' => 'Users', 'action' => 'login'],
-            ['_name' => 'users:login'],
-        );
+        $builder
+            ->connect(
+                '/login',
+                ['controller' => 'Users', 'action' => 'login'],
+                ['_name' => 'users:login'],
+            )
+            ->setMiddleware(['recaptchaV3']);
 
         $builder->connect(
             '/logout',
@@ -96,11 +103,13 @@ return function (RouteBuilder $routes): void {
             )
             ->setPass(['token']);
 
-        $builder->connect(
-            '/reset-password',
-            ['controller' => 'Users', 'action' => 'requestPasswordReset'],
-            ['_name' => 'users:requestPasswordReset'],
-        );
+        $builder
+            ->connect(
+                '/reset-password',
+                ['controller' => 'Users', 'action' => 'requestPasswordReset'],
+                ['_name' => 'users:requestPasswordReset'],
+            )
+            ->setMiddleware(['recaptchaV3']);
 
         $builder
             ->connect(

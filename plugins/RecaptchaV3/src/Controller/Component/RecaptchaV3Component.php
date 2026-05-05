@@ -6,23 +6,13 @@ namespace RecaptchaV3\Controller\Component;
 use RecaptchaV3\Service\RecaptchaV3Service;
 use Cake\Controller\Component;
 use Cake\Controller\ComponentRegistry;
+use RecaptchaV3\VerificationResult;
 
 /**
  * RecaptchaV3 component
  */
 class RecaptchaV3Component extends Component
 {
-    /**
-     * Default configuration.
-     *
-     * @var array<string, mixed>
-     */
-    protected array $_defaultConfig = [
-        'actions' => [],
-    ];
-
-    protected ?array $result;
-
     public function __construct(
         ComponentRegistry $registry,
         private RecaptchaV3Service $recaptchaV3,
@@ -31,9 +21,14 @@ class RecaptchaV3Component extends Component
         return parent::__construct($registry, $config);
     }
 
-    public function getResult(): ?array
+    public function check(callable $handler): bool
     {
-        return $this->result;
+        return $this->getResult()->check($handler);
+    }
+
+    public function getResult(): ?VerificationResult
+    {
+        return $this->getController()->getRequest()->getAttribute('recaptchaV3Result');
     }
 
     public function getService(): RecaptchaV3Service
@@ -41,15 +36,10 @@ class RecaptchaV3Component extends Component
         return $this->recaptchaV3;
     }
 
-    public function beforeRender(): void
+    public function setSiteKey(): void
     {
-        $controller = $this->getController();
-        $request = $controller->getRequest();
-
-        if (in_array($request->getParam('action'), $this->getConfig('actions'))) {
-            $controller->set([
-                'recaptchaV3SiteKey' => $this->recaptchaV3->getSiteKey(),
-            ]);
-        }
+        $this->getController()->set([
+            'recaptchaV3SiteKey' => $this->recaptchaV3->getSiteKey(),
+        ]);
     }
 }

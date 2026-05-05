@@ -5,6 +5,7 @@ namespace RecaptchaV3\Service;
 
 use Cake\Http\Client;
 use Cake\Http\Exception\HttpException;
+use RecaptchaV3\VerificationResult;
 
 class RecaptchaV3Service
 {
@@ -22,7 +23,7 @@ class RecaptchaV3Service
         return $this->siteKey;
     }
 
-    public function verifyRecaptchaResponse(string $gRecaptchaResponse): array
+    public function verifyRecaptchaResponse(string $gRecaptchaResponse): VerificationResult
     {
         $client = new Client();
         $response = $client->post(
@@ -38,6 +39,6 @@ class RecaptchaV3Service
             throw new HttpException(sprintf('Recaptcha response: %s', $body));
         }
 
-        return json_decode($response->getJson(), true);
+        return new VerificationResult($response->getJson());
     }
 }
