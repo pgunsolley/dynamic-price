@@ -23,7 +23,7 @@ class ActionConfigurationSet
         foreach ($config as $conf) {
             $action = $conf->getAction();
 
-            if ($this->exists($action)) {
+            if ($this->get($action)) {
                 throw new InvalidArgumentException(sprintf('Config for action %s already exists', $action));
             }
 
@@ -38,20 +38,5 @@ class ActionConfigurationSet
     public function get(string $action): ?ActionConfiguration
     {
         return array_find($this->actionConfigurations, fn($config) => $config->getAction() === $action);
-    }
-
-    /**
-     * @param string $action The name of the action
-     * @return bool
-     */
-    public function exists(string $action): bool
-    {
-        foreach ($this->actionConfigurations as $actionConfiguration) {
-            if ($actionConfiguration->getAction() === $action) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

@@ -66,27 +66,26 @@ class RecaptchaV3Component extends Component
         return $this->getRequest()->getParam('action');
     }
 
-    public function currentActionIsConfigured()
-    {
-        return $this->actions->exists($this->getCurrentAction());
-    }
-
     public function beforeFilter(EventInterface $event)
     {
-        if ($this->getRequest()->is('post') && $this->currentActionIsConfigured()) {
+        if ($this->getRequest()->is('post')) {
             $config = $this->actions->get($this->getCurrentAction());
-            $handler = $config->getHandler();
 
-            if (!$this->check($handler)) {
-                $event->stopPropagation();
-                $this->getController()->redirect($config->getOnFailRedirect());
+            if ($config !== null) {
+                $handler = $config->getHandler();
+
+                if (!$this->check($handler)) {
+                    $event->stopPropagation();
+                    $this->getController()->Flash->error(__('Recaptcha failed'));
+                    $this->getController()->redirect($config->getOnFailRedirect());
+                }
             }
         }
     }
 
     public function beforeRender()
     {
-        if ($this->currentActionIsConfigured()) {
+        if ($this->actions->get($this->getCurrentAction())) {
             $this->setSiteKey();
         }
     }
