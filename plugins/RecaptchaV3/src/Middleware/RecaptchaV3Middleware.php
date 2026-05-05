@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace RecaptchaV3\Middleware;
 
 use Cake\Http\Exception\BadRequestException;
+use Cake\Http\ServerRequest;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -22,7 +23,7 @@ class RecaptchaV3Middleware implements MiddlewareInterface
     /**
      * Process method.
      *
-     * @param \Psr\Http\Message\ServerRequestInterface $request The request.
+     * @param \Cake\Http\ServerRequest $request The request.
      * @param \Psr\Http\Server\RequestHandlerInterface $handler The request handler.
      * @return \Psr\Http\Message\ResponseInterface A response.
      */
@@ -36,7 +37,8 @@ class RecaptchaV3Middleware implements MiddlewareInterface
                 throw new BadRequestException('Request body is missing required g-recaptcha-response field');
             }
 
-            $result = $this->recaptchaV3->verifyRecaptchaResponse($parsedBody['g-recaptcha-response']);
+            $clientIp = $request instanceof ServerRequest ? $request->clientIp() : null;
+            $result = $this->recaptchaV3->verifyRecaptchaResponse($parsedBody['g-recaptcha-response'], $clientIp);
             $request = $request->withAttribute('recaptchaV3Result', $result);
             $response = $handler->handle($request);
 

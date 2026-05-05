@@ -45,7 +45,7 @@ class UsersController extends AppController
                 action: 'login',
                 handler: fn(array $res) =>
                     $res['success'] 
-                        && $res['score'] > 0.6 // TODO: Use dynamic value
+                        && $res['score'] > 0.6
                         && $res['action'] === 'login'
                 ,
                 onFailRedirect: ['_name' => 'users:login'],
@@ -54,7 +54,7 @@ class UsersController extends AppController
                 action: 'register',
                 handler: fn(array $res) =>
                     $res['success'] 
-                        && $res['score'] > 0.7 // TODO: Use dynamic value
+                        && $res['score'] > 0.7
                         && $res['action'] === 'register'
                 ,
                 onFailRedirect: ['_name' => 'users:register'],
@@ -63,7 +63,7 @@ class UsersController extends AppController
                 action: 'requestPasswordReset',
                 handler: fn(array $res) =>
                     $res['success'] 
-                        && $res['score'] > 0.7 // TODO: Use dynamic value
+                        && $res['score'] > 0.7
                         && $res['action'] === 'request-password-reset'
                 ,
                 onFailRedirect: ['_name' => 'users:requestPasswordReset'],

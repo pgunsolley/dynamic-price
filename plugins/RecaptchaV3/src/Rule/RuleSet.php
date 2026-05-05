@@ -11,23 +11,23 @@ class RuleSet
     private array $rules = [];
 
     /**
-     * @param \RecaptchaV3\Rule\Rule|\RecaptchaV3\Rule\Rule[] $config
+     * @param \RecaptchaV3\Rule\Rule|\RecaptchaV3\Rule\Rule[] $rule
      * @return void
      */
-    public function add(Rule|array $config)
+    public function add(Rule|array $rule)
     {
-        if (!is_array($config)) {
-            $config = [$config];
+        if (!is_array($rule)) {
+            $rule = [$rule];
         }
 
-        foreach ($config as $conf) {
-            $action = $conf->getAction();
+        foreach ($rule as $_rule) {
+            $action = $_rule->getAction();
 
             if ($this->get($action)) {
                 throw new InvalidArgumentException(sprintf('Rule for action %s already exists', $action));
             }
 
-            $this->rules[] = $conf;
+            $this->rules[] = $_rule;
         }
     }
 
@@ -37,6 +37,6 @@ class RuleSet
      */
     public function get(string $action): ?Rule
     {
-        return array_find($this->rules, fn($config) => $config->getAction() === $action);
+        return array_find($this->rules, fn($rule) => $rule->getAction() === $action);
     }
 }

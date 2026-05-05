@@ -23,15 +23,21 @@ class RecaptchaV3Service
         return $this->siteKey;
     }
 
-    public function verifyRecaptchaResponse(string $gRecaptchaResponse): VerificationResult
+    public function verifyRecaptchaResponse(string $gRecaptchaResponse, ?string $remoteIp = null): VerificationResult
     {
+        $data = [
+            'secret' => $this->secretKey,
+            'response' => $gRecaptchaResponse,
+        ];
+
+        if ($remoteIp !== null) {
+            $data['remoteip'] = $remoteIp;
+        }
+
         $client = new Client();
         $response = $client->post(
             url: 'https://www.google.com/recaptcha/api/siteverify',
-            data: [
-                'secret' => $this->secretKey,
-                'response' => $gRecaptchaResponse,
-            ],
+            data: $data,
         );
         
         if (!$response->isSuccess()) {
