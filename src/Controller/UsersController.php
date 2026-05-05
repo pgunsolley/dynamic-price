@@ -38,7 +38,13 @@ class UsersController extends AppController
             'handlePasswordReset',
         ]);
 
-        $this->loadComponent('RecaptchaV3.RecaptchaV3');
+        $this->loadComponent('RecaptchaV3.RecaptchaV3', [
+            'setSiteKeyForActions' => [
+                'login',
+                'register',
+                'requestPasswordReset',
+            ],
+        ]);
     }
 
     public function register(UsersMailerService $usersMailer)
@@ -68,7 +74,6 @@ class UsersController extends AppController
             }
         }
 
-        $this->RecaptchaV3->setSiteKey();
         $this->set(compact('user'));
     }
 
@@ -174,7 +179,6 @@ class UsersController extends AppController
             }
         }
 
-        $this->RecaptchaV3->setSiteKey();
         $this->set(compact('form'));
     }
 
@@ -264,7 +268,6 @@ class UsersController extends AppController
             };
         }
 
-        $this->RecaptchaV3->setSiteKey();
         $this->set(compact('form'));
     }
 

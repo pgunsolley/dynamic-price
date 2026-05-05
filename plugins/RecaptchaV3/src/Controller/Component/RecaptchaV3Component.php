@@ -13,6 +13,10 @@ use RecaptchaV3\VerificationResult;
  */
 class RecaptchaV3Component extends Component
 {
+    protected array $_defaultConfig = [
+        'setSiteKeyForActions' => [],
+    ];
+
     public function __construct(
         ComponentRegistry $registry,
         private RecaptchaV3Service $recaptchaV3,
@@ -41,5 +45,15 @@ class RecaptchaV3Component extends Component
         $this->getController()->set([
             'recaptchaV3SiteKey' => $this->recaptchaV3->getSiteKey(),
         ]);
+    }
+
+    public function beforeRender()
+    {
+        $actions = $this->getConfig('setSiteKeyForActions');
+        $currentAction = $this->getController()->getRequest()->getParam('action');
+
+        if (in_array($currentAction, $actions)) {
+            $this->setSiteKey();
+        }
     }
 }
