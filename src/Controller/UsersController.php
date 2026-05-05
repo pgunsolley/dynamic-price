@@ -64,7 +64,7 @@ class UsersController extends AppController
                 validator: fn(array $res) =>
                     $res['success'] 
                         && $res['score'] > 0.7
-                        && $res['action'] === 'request-password-reset'
+                        && $res['action'] === 'request_password_reset'
                 ,
                 onFailRedirect: ['_name' => 'users:requestPasswordReset'],
             ),

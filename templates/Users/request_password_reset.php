@@ -14,7 +14,7 @@ $formId = 'password-reset-form';
     </fieldset>
     <?= $this->element('RecaptchaV3.submit', [
         'text' => 'Send password reset email',
-        'action' => 'request-password-reset',
+        'action' => 'request_password_reset',
     ]) ?>
     <?= $this->Form->end() ?>
     <?= $this->Html->link(__('Go back'), ['_name' => 'users:login']) ?>
