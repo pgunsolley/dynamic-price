@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace RecaptchaV3\Controller\Component\RecaptchaV3;
+namespace RecaptchaV3\Rule;
 
 use Closure;
 use Psr\Http\Message\UriInterface;
 
-class ActionConfiguration
+class Rule
 {
     public function __construct(
         private string $action,

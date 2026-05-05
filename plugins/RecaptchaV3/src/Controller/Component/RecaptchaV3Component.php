@@ -9,7 +9,7 @@ use Cake\Controller\ComponentRegistry;
 use Cake\Event\EventInterface;
 use Cake\Http\ServerRequest;
 use Override;
-use RecaptchaV3\Controller\Component\RecaptchaV3\ActionConfigurationSet;
+use RecaptchaV3\Rule\RuleSet;
 use RecaptchaV3\VerificationResult;
 
 /**
@@ -17,7 +17,7 @@ use RecaptchaV3\VerificationResult;
  */
 class RecaptchaV3Component extends Component
 {
-    public readonly ActionConfigurationSet $actions;
+    public readonly RuleSet $rules;
 
     public function __construct(
         ComponentRegistry $registry,
@@ -31,7 +31,7 @@ class RecaptchaV3Component extends Component
     public function initialize(array $config): void
     {
         parent::initialize($config);
-        $this->actions = new ActionConfigurationSet();
+        $this->rules = new RuleSet();
     }
 
     public function check(callable $handler): bool
@@ -69,15 +69,15 @@ class RecaptchaV3Component extends Component
     public function beforeFilter(EventInterface $event)
     {
         if ($this->getRequest()->is('post')) {
-            $config = $this->actions->get($this->getCurrentAction());
+            $rule = $this->rules->get($this->getCurrentAction());
 
-            if ($config !== null) {
-                $handler = $config->getHandler();
+            if ($rule !== null) {
+                $handler = $rule->getHandler();
 
                 if (!$this->check($handler)) {
                     $event->stopPropagation();
                     $this->getController()->Flash->error(__('Recaptcha failed'));
-                    $this->getController()->redirect($config->getOnFailRedirect());
+                    $this->getController()->redirect($rule->getOnFailRedirect());
                 }
             }
         }
@@ -85,7 +85,7 @@ class RecaptchaV3Component extends Component
 
     public function beforeRender()
     {
-        if ($this->actions->get($this->getCurrentAction())) {
+        if ($this->rules->get($this->getCurrentAction())) {
             $this->setSiteKey();
         }
     }
