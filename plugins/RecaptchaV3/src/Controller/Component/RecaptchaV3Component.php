@@ -31,7 +31,7 @@ class RecaptchaV3Component extends Component
     public function initialize(array $config): void
     {
         parent::initialize($config);
-        $this->actions = new ActionConfigurationSet([]);
+        $this->actions = new ActionConfigurationSet();
     }
 
     public function check(callable $handler): bool
