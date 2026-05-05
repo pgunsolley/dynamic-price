@@ -7,7 +7,6 @@ use App\Form\PasswordConfirmationForm;
 use App\Form\EmailForm;
 use App\Form\UserForm;
 use App\Form\UserForm\Enum\Status;
-use App\Model\Entity\User;
 use App\Service\JwtService;
 use App\Service\UsersMailerService;
 use Firebase\JWT\ExpiredException;
