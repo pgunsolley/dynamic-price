@@ -8,7 +8,6 @@ use Cake\Controller\Component;
 use Cake\Controller\ComponentRegistry;
 use Cake\Event\EventInterface;
 use Cake\Http\ServerRequest;
-use Override;
 use RecaptchaV3\RuleSet;
 use RecaptchaV3\VerificationResult;
 
@@ -24,13 +23,7 @@ class RecaptchaV3Component extends Component
         private RecaptchaV3Service $recaptchaV3,
         array $config = [],
     ) {
-        return parent::__construct($registry, $config);
-    }
-
-    #[Override]
-    public function initialize(array $config): void
-    {
-        parent::initialize($config);
+        parent::__construct($registry, $config);
         $this->rules = new RuleSet();
     }
 
