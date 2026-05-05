@@ -12,7 +12,6 @@ use App\Service\UsersMailerService;
 use Firebase\JWT\ExpiredException;
 use Exception;
 use RecaptchaV3\Controller\Component\RecaptchaV3\ActionConfiguration;
-use RecaptchaV3\Controller\Component\RecaptchaV3\ActionConfigurationSet;
 
 /**
  * Users Controller
