@@ -17,7 +17,7 @@ namespace RecaptchaV3;
  */
 class VerificationResult
 {
-    private bool $checked = false;
+    private bool $validated = false;
 
     private bool $result = false;
 
@@ -25,27 +25,27 @@ class VerificationResult
     {
     }
 
-    public function isChecked(): bool
+    public function isValidated(): bool
     {
-        return $this->checked;
+        return $this->validated;
     }
 
-    public function getResult(): bool
+    public function isValid(): bool
     {
         return $this->result;
     }
 
     /**
-     * @param callable(array): bool $handler
+     * @param callable(array): bool $validator
      */
-    public function check(callable $handler): bool
+    public function validate(callable $validator): bool
     {
-        if ($this->isChecked()) {
+        if ($this->isValidated()) {
             return $this->result;
         }
 
-        $this->checked = true;
-        $this->result = $handler($this->data);
+        $this->validated = true;
+        $this->result = $validator($this->data);
         return $this->result;
     }
 }

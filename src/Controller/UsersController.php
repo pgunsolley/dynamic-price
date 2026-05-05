@@ -43,7 +43,7 @@ class UsersController extends AppController
         $this->RecaptchaV3->rules->add([
             new Rule(
                 action: 'login',
-                handler: fn(array $res) =>
+                validator: fn(array $res) =>
                     $res['success'] 
                         && $res['score'] > 0.6
                         && $res['action'] === 'login'
@@ -52,7 +52,7 @@ class UsersController extends AppController
             ),
             new Rule(
                 action: 'register',
-                handler: fn(array $res) =>
+                validator: fn(array $res) =>
                     $res['success'] 
                         && $res['score'] > 0.7
                         && $res['action'] === 'register'
@@ -61,7 +61,7 @@ class UsersController extends AppController
             ),
             new Rule(
                 action: 'requestPasswordReset',
-                handler: fn(array $res) =>
+                validator: fn(array $res) =>
                     $res['success'] 
                         && $res['score'] > 0.7
                         && $res['action'] === 'request-password-reset'

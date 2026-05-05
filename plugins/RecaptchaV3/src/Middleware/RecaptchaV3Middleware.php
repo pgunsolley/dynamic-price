@@ -45,8 +45,8 @@ class RecaptchaV3Middleware implements MiddlewareInterface
             // This is a developerland check to ensure the result is checked at some point in the lifecycle.
             // The controller action, and other middleware, will still execute, before this code is reached, 
             // if a check is not performed and handled respectively in the request lifecycle.
-            if (!$result->isChecked()) {
-                throw new BadRequestException('Recaptcha response has not been checked');
+            if (!$result->isValidated()) {
+                throw new BadRequestException('Recaptcha response has not been validated');
             }
 
             return $response;

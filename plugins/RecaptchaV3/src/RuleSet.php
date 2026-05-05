@@ -7,11 +7,11 @@ use InvalidArgumentException;
 
 class RuleSet
 {
-    /** @var \RecaptchaV3\Rule\Rule[] $rules */
+    /** @var \RecaptchaV3\Rule[] $rules */
     private array $rules = [];
 
     /**
-     * @param \RecaptchaV3\Rule\Rule|\RecaptchaV3\Rule\Rule[] $rule
+     * @param \RecaptchaV3\Rule|\RecaptchaV3\Rule[] $rule
      * @return void
      */
     public function add(Rule|array $rule)
@@ -33,7 +33,7 @@ class RuleSet
 
     /**
      * @param string $action The name of the action
-     * @return \RecaptchaV3\Rule\Rule|null
+     * @return \RecaptchaV3\Rule|null
      */
     public function get(string $action): ?Rule
     {

@@ -10,7 +10,7 @@ class Rule
 {
     public function __construct(
         private string $action,
-        private Closure $handler,
+        private Closure $validator,
         private array|string|UriInterface $onFailRedirect,
     ) {
     }
@@ -20,9 +20,9 @@ class Rule
         return $this->action;
     }
 
-    public function getHandler(): Closure
+    public function getValidator(): Closure
     {
-        return $this->handler;
+        return $this->validator;
     }
 
     public function getOnFailRedirect(): array|string|UriInterface

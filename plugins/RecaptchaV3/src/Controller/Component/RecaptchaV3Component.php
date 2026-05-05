@@ -34,9 +34,9 @@ class RecaptchaV3Component extends Component
         $this->rules = new RuleSet();
     }
 
-    public function check(callable $handler): bool
+    public function validate(callable $validator): bool
     {
-        return $this->getResult()->check($handler);
+        return $this->getResult()->validate($validator);
     }
 
     public function getResult(): ?VerificationResult
@@ -72,9 +72,7 @@ class RecaptchaV3Component extends Component
             $rule = $this->rules->get($this->getCurrentAction());
 
             if ($rule !== null) {
-                $handler = $rule->getHandler();
-
-                if (!$this->check($handler)) {
+                if (!$this->validate($rule->getValidator())) {
                     $event->stopPropagation();
                     $this->getController()->Flash->error(__('Recaptcha failed'));
                     $this->getController()->redirect($rule->getOnFailRedirect());
