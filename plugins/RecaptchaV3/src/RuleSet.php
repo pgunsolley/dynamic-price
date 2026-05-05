@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace RecaptchaV3\Rule;
+namespace RecaptchaV3;
 
 use InvalidArgumentException;
 

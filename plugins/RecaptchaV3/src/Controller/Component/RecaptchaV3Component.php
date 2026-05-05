@@ -9,7 +9,7 @@ use Cake\Controller\ComponentRegistry;
 use Cake\Event\EventInterface;
 use Cake\Http\ServerRequest;
 use Override;
-use RecaptchaV3\Rule\RuleSet;
+use RecaptchaV3\RuleSet;
 use RecaptchaV3\VerificationResult;
 
 /**

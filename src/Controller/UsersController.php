@@ -11,7 +11,7 @@ use App\Service\JwtService;
 use App\Service\UsersMailerService;
 use Firebase\JWT\ExpiredException;
 use Exception;
-use RecaptchaV3\Rule\Rule;
+use RecaptchaV3\Rule;
 
 /**
  * Users Controller
