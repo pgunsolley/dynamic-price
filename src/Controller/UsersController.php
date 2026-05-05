@@ -47,7 +47,7 @@ class UsersController extends AppController
                 handler: fn(array $res) =>
                     $res['success'] 
                         && $res['score'] > 0.8
-                        && $res['action'] === 'logins'
+                        && $res['action'] === 'login'
                 ,
                 onFailRedirect: ['_name' => 'users:login'],
             ),
