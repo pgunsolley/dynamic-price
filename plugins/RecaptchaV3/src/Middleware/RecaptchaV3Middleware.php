@@ -16,8 +16,27 @@ use RecaptchaV3\Service\RecaptchaV3Service;
  */
 class RecaptchaV3Middleware implements MiddlewareInterface
 {
-    public function __construct(private RecaptchaV3Service $recaptchaV3)
+    /**
+     * @param RecaptchaV3Service $recaptchaV3 The RecaptchaV3 service
+     * @param bool $sendRemoteIp Flag to send remote client IP to recaptcha service
+     */
+    public function __construct(private RecaptchaV3Service $recaptchaV3, private bool $sendRemoteIp = false)
     {
+    }
+
+    /**
+     * Find and return the client IP address
+     * 
+     * @param ServerRequestInterface $request
+     * @return string
+     */
+    private function getClientIp(ServerRequestInterface $request): string
+    {
+        if ($request instanceof ServerRequest) {
+            return $request->clientIp();
+        }
+
+        return $_SERVER['REMOTE_ADDR'];
     }
 
     /**
@@ -37,7 +56,12 @@ class RecaptchaV3Middleware implements MiddlewareInterface
                 throw new BadRequestException('Request body is missing required g-recaptcha-response field');
             }
 
-            $clientIp = $request instanceof ServerRequest ? $request->clientIp() : null;
+            $clientIp = null;
+
+            if ($this->sendRemoteIp) {
+                $clientIp = $this->getClientIp($request);
+            }
+
             $result = $this->recaptchaV3->verifyRecaptchaResponse($parsedBody['g-recaptcha-response'], $clientIp);
             $request = $request->withAttribute('recaptchaV3Result', $result);
             $response = $handler->handle($request);

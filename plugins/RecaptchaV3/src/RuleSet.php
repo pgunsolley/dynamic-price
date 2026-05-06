@@ -5,13 +5,28 @@ namespace RecaptchaV3;
 
 use InvalidArgumentException;
 
+/**
+ * RuleSet
+ * 
+ * A set of Rule unique by controller action name
+ */
 class RuleSet
 {
-    /** @var \RecaptchaV3\Rule[] $rules */
+    /** 
+     * An array of Rule
+     * 
+     * @var Rule[]
+     */
     private array $rules = [];
 
     /**
-     * @param \RecaptchaV3\Rule|\RecaptchaV3\Rule[] $rule
+     * Adds a Rule to the set
+     * 
+     * Uniqueness is guaranteed by the Rule action name.
+     * 
+     * @param Rule|Rule[] $rule Rule instance
+     * @throws InvalidArgumentException If a Rule already exists with the same 
+     *  controller action name
      * @return void
      */
     public function add(Rule|array $rule)
@@ -32,8 +47,10 @@ class RuleSet
     }
 
     /**
+     * Finds and returns the Rule for the corresponding action
+     * 
      * @param string $action The name of the action
-     * @return \RecaptchaV3\Rule|null
+     * @return \RecaptchaV3\Rule|null Returns Rule if found, otherwise null
      */
     public function get(string $action): ?Rule
     {

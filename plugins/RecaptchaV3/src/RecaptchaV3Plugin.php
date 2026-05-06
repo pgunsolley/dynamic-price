@@ -29,7 +29,10 @@ class RecaptchaV3Plugin extends BasePlugin
     {
         $container
             ->add(RecaptchaV3Middleware::class)
-            ->addArgument(RecaptchaV3Service::class);
+            ->addArguments([
+                RecaptchaV3Service::class,
+                new BooleanArgument(Configure::read('RecaptchaV3.Middleware.RecaptchaV3.sendRemoteIp', false)),
+            ]);
 
         $container
             ->add(RecaptchaV3Component::class)
@@ -41,9 +44,8 @@ class RecaptchaV3Plugin extends BasePlugin
         $container
             ->addShared(RecaptchaV3Service::class)
             ->addArguments([
-                new StringArgument(Configure::readOrFail('RecaptchaV3.secretKey')),
-                new StringArgument(Configure::readOrFail('RecaptchaV3.siteKey')),
-                new BooleanArgument(Configure::read('RecaptchaV3.sendRemoteIp', true)),
+                new StringArgument(Configure::readOrFail('RecaptchaV3.Services.RecaptchaV3.secretKey')),
+                new StringArgument(Configure::readOrFail('RecaptchaV3.Services.RecaptchaV3.siteKey')),
             ]);
     }
 }
