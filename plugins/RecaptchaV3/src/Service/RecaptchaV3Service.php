@@ -9,8 +9,11 @@ use RecaptchaV3\VerificationResult;
 
 class RecaptchaV3Service
 {
-    public function __construct(private string $secretKey, private string $siteKey)
-    {
+    public function __construct(
+        private readonly string $secretKey,
+        private readonly string $siteKey,
+        private readonly bool $sendRemoteIp,
+    ) {
     }
 
     public function getSecretKey(): string
@@ -30,7 +33,7 @@ class RecaptchaV3Service
             'response' => $gRecaptchaResponse,
         ];
 
-        if ($remoteIp !== null) {
+        if ($remoteIp !== null && $this->sendRemoteIp) {
             $data['remoteip'] = $remoteIp;
         }
 

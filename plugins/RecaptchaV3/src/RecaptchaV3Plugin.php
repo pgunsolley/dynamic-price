@@ -7,6 +7,7 @@ use Cake\Controller\ComponentRegistry;
 use Cake\Core\BasePlugin;
 use Cake\Core\Configure;
 use Cake\Core\ContainerInterface;
+use League\Container\Argument\Literal\BooleanArgument;
 use League\Container\Argument\Literal\StringArgument;
 use RecaptchaV3\Controller\Component\RecaptchaV3Component;
 use RecaptchaV3\Middleware\RecaptchaV3Middleware;
@@ -42,6 +43,7 @@ class RecaptchaV3Plugin extends BasePlugin
             ->addArguments([
                 new StringArgument(Configure::readOrFail('RecaptchaV3.secretKey')),
                 new StringArgument(Configure::readOrFail('RecaptchaV3.siteKey')),
+                new BooleanArgument(Configure::read('RecaptchaV3.sendRemoteIp', true)),
             ]);
     }
 }
