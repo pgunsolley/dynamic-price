@@ -7,9 +7,10 @@ use RecaptchaV3\Service\RecaptchaV3Service;
 use Cake\Controller\Component;
 use Cake\Controller\ComponentRegistry;
 use Cake\Event\EventInterface;
+use Cake\Http\Exception\InternalErrorException;
 use Cake\Http\ServerRequest;
+use RecaptchaV3\Assessment;
 use RecaptchaV3\RuleSet;
-use RecaptchaV3\VerificationResult;
 
 /**
  * RecaptchaV3 component
@@ -24,6 +25,7 @@ class RecaptchaV3Component extends Component
     /**
      * @param ComponentRegistry $registry
      * @param RecaptchaV3Service $recaptchaV3
+     * @param array $config
      */
     public function __construct(
         ComponentRegistry $registry,
@@ -35,48 +37,13 @@ class RecaptchaV3Component extends Component
     }
 
     /**
-     * Calls the VerificationResult validate method
-     * 
-     * @param callable $validator The validation handler
-     * @return bool The result of the validator, or false 
-     *  if the VerificationResult is not set in the Request.
-     */
-    public function validate(callable $validator): bool
-    {
-        return !!$this->getResult()?->validate($validator);
-    }
-
-    /**
-     * Returns the VerificationResult set in the Request
-     * 
-     * @return VerificationResult|null The VerificationResult,
-     *  or null if not set in the Request.
-     */
-    public function getResult(): ?VerificationResult
-    {
-        return $this->getRequest()->getAttribute('recaptchaV3Result');
-    }
-
-    /**
-     * Returns the RecaptchaV3 service
+     * Returns the RecaptchaV3Service
      * 
      * @return RecaptchaV3Service
      */
     public function getService(): RecaptchaV3Service
     {
         return $this->recaptchaV3;
-    }
-
-    /**
-     * Sets the site key on the view builder
-     * 
-     * @return void
-     */
-    public function setSiteKey(): void
-    {
-        $this->getController()->set([
-            'recaptchaV3SiteKey' => $this->recaptchaV3->getSiteKey(),
-        ]);
     }
 
     /**
@@ -90,13 +57,21 @@ class RecaptchaV3Component extends Component
     }
 
     /**
-     * Returns the name of the current controller action
+     * Returns the assessment or null if not set
      * 
-     * @return string
+     * The RecaptchaV3Middleware will set the assessment on the request
+     * upon a successful verification call.
      */
-    private function getCurrentAction(): string
+    public function getAssessment(): ?Assessment
     {
-        return $this->getRequest()->getParam('action');
+        return $this->getRequest()->getAttribute('recaptchav3.assessment');
+    }
+
+    public function setSiteKey(): void
+    {
+        $this->getController()->set([
+            'recaptchaV3SiteKey' => $this->recaptchaV3->getSiteKey(),
+        ]);
     }
 
     /**
@@ -108,14 +83,23 @@ class RecaptchaV3Component extends Component
     public function beforeFilter(EventInterface $event)
     {
         if ($this->getRequest()->is('post')) {
-            $rule = $this->rules->get($this->getCurrentAction());
+            $assessment = $this->getAssessment();
 
-            if ($rule !== null) {
-                if (!$this->validate($rule->getValidator())) {
-                    $event->stopPropagation();
-                    $this->getController()->Flash->error(__('Recaptcha failed'));
-                    $this->getController()->redirect($rule->getOnFailRedirect());
-                }
+            if ($assessment === null) {
+                return;
+            }
+
+            $action = $assessment->getAction();
+            $rule = $this->rules->get($action);
+
+            if ($rule === null) {
+                throw new InternalErrorException(sprintf('Missing rule for action %s', $action));
+            }
+
+            if (!$assessment->evaluate($rule->getEvaluator())) {
+                $event->stopPropagation();
+                $this->getController()->Flash->error(__('Recaptcha failed'));
+                $this->getController()->redirect($rule->getOnFailRedirect());
             }
         }
     }
@@ -127,8 +111,6 @@ class RecaptchaV3Component extends Component
      */
     public function beforeRender()
     {
-        if ($this->rules->get($this->getCurrentAction())) {
-            $this->setSiteKey();
-        }
+
     }
 }

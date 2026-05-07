@@ -9,6 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use RecaptchaV3\Assessment;
 use RecaptchaV3\Service\RecaptchaV3Service;
 
 /**
@@ -42,9 +43,11 @@ class RecaptchaV3Middleware implements MiddlewareInterface
     /**
      * Process method.
      *
-     * @param \Cake\Http\ServerRequest $request The request.
-     * @param \Psr\Http\Server\RequestHandlerInterface $handler The request handler.
-     * @return \Psr\Http\Message\ResponseInterface A response.
+     * @param \Psr\Http\Message\ServerRequestInterface $request The request
+     * @param \Psr\Http\Server\RequestHandlerInterface $handler The request handler
+     * @throws BadRequestException If 'g-recaptcha-response' is missing from server request body
+     * @throws BadRequestException If verification result is not checked by application
+     * @return \Psr\Http\Message\ResponseInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
@@ -62,14 +65,14 @@ class RecaptchaV3Middleware implements MiddlewareInterface
                 $clientIp = $this->getClientIp($request);
             }
 
-            $result = $this->recaptchaV3->verifyRecaptchaResponse($parsedBody['g-recaptcha-response'], $clientIp);
-            $request = $request->withAttribute('recaptchaV3Result', $result);
+            $assessment = new Assessment($this->recaptchaV3->verifyRecaptchaResponse($parsedBody['g-recaptcha-response'], $clientIp));
+            $request = $request->withAttribute('recaptchav3.assessment', $assessment);
             $response = $handler->handle($request);
 
             // This is a developerland check to ensure the result is checked at some point in the lifecycle.
             // The controller action, and other middleware, will still execute, before this code is reached, 
             // if a check is not performed and handled respectively in the request lifecycle.
-            if (!$result->isValidated()) {
+            if (!$assessment->isEvaluated()) {
                 throw new BadRequestException('Recaptcha response has not been validated');
             }
 

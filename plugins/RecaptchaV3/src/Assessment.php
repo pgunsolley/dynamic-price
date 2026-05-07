@@ -4,20 +4,16 @@ declare(strict_types=1);
 namespace RecaptchaV3;
 
 /**
- * RecaptchaV3 verification result
+ * RecaptchaV3 assessment
  */
-class VerificationResult
+class Assessment
 {
     /**
-     * Flag that is set to true if validate has been called
-     * 
      * @var bool
      */
-    private bool $validated = false;
+    private bool $evaluated = false;
 
     /**
-     * Flag that is set to true if validate returned true
-     * 
      * @var bool
      */
     private bool $result = false;
@@ -48,13 +44,23 @@ class VerificationResult
     }
 
     /**
-     * Returns the value of the validated flag
+     * Returns the recaptcha action
+     * 
+     * @return string
+     */
+    public function getAction(): string
+    {
+        return $this->data['action'];
+    }
+
+    /**
+     * Returns the value of the resolved flag
      * 
      * @return bool
      */
-    public function isValidated(): bool
+    public function isEvaluated(): bool
     {
-        return $this->validated;
+        return $this->evaluated;
     }
 
     /**
@@ -68,23 +74,22 @@ class VerificationResult
     }
 
     /**
-     * Calls the validator once, returning the validator result
+     * Calls the evaluator once, returning the evaluator result
      * 
-     * The validated flag will be set to `true` regardless of the validator result.
+     * The resolved flag will be set to `true` regardless of the evaluator result.
      *
-     * This method will not run the validator if the validated flag is already `true`.
+     * This method will not run the evaluator if the resolved flag is already `true`.
      * 
-     * @param callable(array): bool $validator The validation handler
+     * @param EvaluatorInterface $evaluator
      * @return bool
      */
-    public function validate(callable $validator): bool
+    public function evaluate(EvaluatorInterface $evaluator): bool
     {
-        if ($this->isValidated()) {
+        if ($this->evaluated) {
             return $this->result;
         }
 
-        $this->validated = true;
-        $this->result = $validator($this->data);
-        return $this->result;
+        $this->evaluated = true;
+        return $this->result = $evaluator->evaluate($this->data);
     }
 }

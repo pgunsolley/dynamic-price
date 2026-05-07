@@ -3,30 +3,29 @@ declare(strict_types=1);
 
 namespace RecaptchaV3;
 
-use Closure;
 use Psr\Http\Message\UriInterface;
 
 /**
  * Rule
  * 
- * Maps a controller action to a recaptcha result validator.
+ * Maps a recaptcha action to a recaptcha assessment evaluator.
  */
 class Rule
 {
     /**
-     * @param string $action The name of the controller action
-     * @param Closure $validator The validator Closure
-     * @param array|string|UriInterface $onFailRedirect The url to redirect to on validator failure
+     * @param string $action The name of the recaptcha action
+     * @param EvaluatorInterface $evaluator
+     * @param array|string|UriInterface $onFailRedirect
      */
     public function __construct(
         private string $action,
-        private Closure $validator,
+        private EvaluatorInterface $evaluator,
         private array|string|UriInterface $onFailRedirect,
     ) {
     }
 
     /**
-     * Returns the controller action name
+     * Returns the recaptcha action name
      * 
      * @return string
      */
@@ -36,13 +35,13 @@ class Rule
     }
 
     /**
-     * Returns the validator
+     * Returns the evaluator
      * 
-     * @return Closure
+     * @return EvaluatorInterface
      */
-    public function getValidator(): Closure
+    public function getEvaluator(): EvaluatorInterface
     {
-        return $this->validator;
+        return $this->evaluator;
     }
 
     /**

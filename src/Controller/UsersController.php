@@ -7,6 +7,7 @@ use App\Form\PasswordConfirmationForm;
 use App\Form\EmailForm;
 use App\Form\UserForm;
 use App\Form\UserForm\Enum\Status;
+use App\RecaptchaV3\UsersEvaluator;
 use App\Service\JwtService;
 use App\Service\UsersMailerService;
 use Firebase\JWT\ExpiredException;
@@ -26,6 +27,30 @@ class UsersController extends AppController
         return $this->redirect(['_name' => 'users:login']);
     }
 
+    private function setupRecaptcha()
+    {
+        $this->loadComponent('RecaptchaV3.RecaptchaV3');
+        $evaluator = new UsersEvaluator();
+
+        $this->RecaptchaV3->rules->add([
+            new Rule(
+                action: 'login',
+                evaluator: $evaluator,
+                onFailRedirect: ['_name' => 'users:login'],
+            ),
+            new Rule(
+                action: 'register',
+                evaluator: $evaluator,
+                onFailRedirect: ['_name' => 'users:register'],
+            ),
+            new Rule(
+                action: 'requestPasswordReset',
+                evaluator: $evaluator,
+                onFailRedirect: ['_name' => 'users:requestPasswordReset'],
+            ),
+        ]);
+    }
+
     public function initialize(): void
     {
         parent::initialize();
@@ -39,36 +64,7 @@ class UsersController extends AppController
             'handlePasswordReset',
         ]);
 
-        $this->loadComponent('RecaptchaV3.RecaptchaV3');
-        $this->RecaptchaV3->rules->add([
-            new Rule(
-                action: 'login',
-                validator: fn(array $res) =>
-                    $res['success'] 
-                        && $res['score'] > 0.6
-                        && $res['action'] === 'login'
-                ,
-                onFailRedirect: ['_name' => 'users:login'],
-            ),
-            new Rule(
-                action: 'register',
-                validator: fn(array $res) =>
-                    $res['success'] 
-                        && $res['score'] > 0.7
-                        && $res['action'] === 'register'
-                ,
-                onFailRedirect: ['_name' => 'users:register'],
-            ),
-            new Rule(
-                action: 'requestPasswordReset',
-                validator: fn(array $res) =>
-                    $res['success'] 
-                        && $res['score'] > 0.7
-                        && $res['action'] === 'request_password_reset'
-                ,
-                onFailRedirect: ['_name' => 'users:requestPasswordReset'],
-            ),
-        ]);
+        $this->setupRecaptcha();
     }
 
     public function register(UsersMailerService $usersMailer)

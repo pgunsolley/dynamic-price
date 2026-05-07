@@ -47,9 +47,9 @@ class RuleSet
     }
 
     /**
-     * Finds and returns the Rule for the corresponding action
+     * Finds and returns the Rule for the corresponding recaptcha action
      * 
-     * @param string $action The name of the action
+     * @param string $action The name of the recaptcha action
      * @return \RecaptchaV3\Rule|null Returns Rule if found, otherwise null
      */
     public function get(string $action): ?Rule

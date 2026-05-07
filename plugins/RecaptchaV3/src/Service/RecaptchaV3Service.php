@@ -4,10 +4,9 @@ declare(strict_types=1);
 namespace RecaptchaV3\Service;
 
 use Cake\Http\Client;
-use Cake\Http\Exception\HttpException;
-use Cake\Http\Exception\InternalErrorException;
+use Cake\Http\Exception\BadRequestException;
 use Cake\Validation\Validator;
-use RecaptchaV3\VerificationResult;
+use InvalidArgumentException;
 
 /**
  * RecaptchaV3 service for handling remote service calls
@@ -45,13 +44,25 @@ class RecaptchaV3Service
     }
 
     /**
-     * Performs validation on the generated recaptcha request payload
+     * Sends web request to the recaptcha service /siteverify endpoint
      * 
-     * @param array $data
+     * @param string $gRecaptchaResponse
+     * @param string|null $remoteIp
+     * @throws InvalidArgumentException If request payload failed validation
+     * @throws BadRequestException If response from recaptcha service is not in the 2xx range
      * @return array
      */
-    private function validateRequestData(array $data)
+    public function verifyRecaptchaResponse(string $gRecaptchaResponse, ?string $remoteIp = null): array
     {
+        $data = [
+            'secret' => $this->secretKey,
+            'response' => $gRecaptchaResponse,
+        ];
+
+        if ($remoteIp !== null) {
+            $data['remoteip'] = $remoteIp;
+        }
+
         $validator = new Validator();
 
         $validator
@@ -67,32 +78,10 @@ class RecaptchaV3Service
         $validator
             ->ip('remoteip');
 
-        return $validator->validate($data);
-    }
-
-    /**
-     * Sends web request to the recaptcha service /siteverify endpoint
-     * 
-     * @param string $gRecaptchaResponse
-     * @param string|null $remoteIp
-     * @throws InternalErrorException If generated request payload failed validation
-     * @return VerificationResult
-     */
-    public function verifyRecaptchaResponse(string $gRecaptchaResponse, ?string $remoteIp = null): VerificationResult
-    {
-        $data = [
-            'secret' => $this->secretKey,
-            'response' => $gRecaptchaResponse,
-        ];
-
-        if ($remoteIp !== null) {
-            $data['remoteip'] = $remoteIp;
-        }
-
-        $validationErrors = $this->validateRequestData($data);
+        $validationErrors = $validator->validate($data);
         
         if (!empty($validationErrors)) {
-            throw new InternalErrorException('Recaptcha request body has validation errors');
+            throw new InvalidArgumentException('Recaptcha request body has validation errors');
         }
 
         $client = new Client();
@@ -103,9 +92,9 @@ class RecaptchaV3Service
         
         if (!$response->isSuccess()) {
             $body = $response->getStringBody();
-            throw new HttpException(sprintf('Recaptcha response: %s', $body));
+            throw new BadRequestException(sprintf('Recaptcha response: %s', $body));
         }
 
-        return new VerificationResult($response->getJson());
+        return $response->getJson();
     }
 }
