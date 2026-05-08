@@ -13,12 +13,6 @@ return [
                 'secretKey' => '',
                 'siteKey' => '',
             ],
-
-            /*
-             * Service for handling the recaptcha service results models
-             */
-            'ResultRepository' => [
-            ],
         ],
 
         /*
