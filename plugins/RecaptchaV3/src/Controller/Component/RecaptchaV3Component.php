@@ -69,6 +69,11 @@ class RecaptchaV3Component extends Component
         return $this->getRequest()->getAttribute('recaptchav3.assessment');
     }
 
+    /**
+     * Set the site key on the view
+     * 
+     * @return void
+     */
     public function setSiteKey(): void
     {
         $this->getController()->set([
@@ -95,7 +100,7 @@ class RecaptchaV3Component extends Component
             $action = $this->actions->get($actionName);
 
             if ($action === null) {
-                throw new InternalErrorException(sprintf('Missing rule for action %s', $actionName));
+                throw new InternalErrorException(sprintf('Missing action for %s', $actionName));
             }
 
             if (!$assessment->evaluate($action->getEvaluator())) {

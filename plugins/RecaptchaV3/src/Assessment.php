@@ -19,9 +19,9 @@ class Assessment
     private bool $result = false;
 
     /**
-     * @param SiteVerifyResponse $data The response data
+     * @param SiteVerifyResponse $response The response data
      */
-    public function __construct(private readonly SiteVerifyResponse $data)
+    public function __construct(private readonly SiteVerifyResponse $response)
     {
     }
 
@@ -32,7 +32,7 @@ class Assessment
      */
     public function getAction(): string
     {
-        return $this->data->getAction();
+        return $this->response->getAction();
     }
 
     /**
@@ -72,6 +72,6 @@ class Assessment
         }
 
         $this->evaluated = true;
-        return $this->result = $evaluator->evaluate($this->data);
+        return $this->result = $evaluator->evaluate($this->response);
     }
 }
