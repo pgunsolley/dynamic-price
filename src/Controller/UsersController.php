@@ -7,7 +7,9 @@ use App\Form\PasswordConfirmationForm;
 use App\Form\EmailForm;
 use App\Form\UserForm;
 use App\Form\UserForm\Enum\Status;
-use App\RecaptchaV3\UsersEvaluator;
+use App\RecaptchaV3\LoginEvaluator;
+use App\RecaptchaV3\RegisterEvaluator;
+use App\RecaptchaV3\RequestPasswordResetEvaluator;
 use App\Service\JwtService;
 use App\Service\UsersMailerService;
 use Firebase\JWT\ExpiredException;
@@ -30,22 +32,21 @@ class UsersController extends AppController
     private function setupRecaptcha()
     {
         $this->loadComponent('RecaptchaV3.RecaptchaV3');
-        $evaluator = new UsersEvaluator();
 
         $this->RecaptchaV3->actions->add([
             new Action(
                 name: 'login',
-                evaluator: $evaluator,
+                evaluator: new LoginEvaluator(),
                 onFailRedirect: ['_name' => 'users:login'],
             ),
             new Action(
                 name: 'register',
-                evaluator: $evaluator,
+                evaluator: new RegisterEvaluator(),
                 onFailRedirect: ['_name' => 'users:register'],
             ),
             new Action(
                 name: 'request_password_reset',
-                evaluator: $evaluator,
+                evaluator: new RequestPasswordResetEvaluator(),
                 onFailRedirect: ['_name' => 'users:requestPasswordReset'],
             ),
         ]);
@@ -89,6 +90,7 @@ class UsersController extends AppController
             }
         }
 
+        $this->RecaptchaV3->setSiteKey();
         $this->set(compact('user'));
     }
 
@@ -130,6 +132,8 @@ class UsersController extends AppController
             $this->Flash->success(__('Verification email sent to {0}', $user->email));
             return $this->redirectToLogin();
         }
+
+        $this->RecaptchaV3->setSiteKey();
     }
 
     public function handleEmailVerification(JwtService $jwt, string $token)
@@ -189,6 +193,7 @@ class UsersController extends AppController
             }
         }
 
+        $this->RecaptchaV3->setSiteKey();
         $this->set(compact('form'));
     }
 
@@ -273,6 +278,7 @@ class UsersController extends AppController
             };
         }
 
+        $this->RecaptchaV3->setSiteKey();
         $this->set(compact('form'));
     }
 

@@ -37,7 +37,7 @@ class ActionSet
             $name = $_action->getName();
 
             if ($this->get($name)) {
-                throw new InvalidArgumentException(sprintf('Action with name %s already exists', $name));
+                throw new InvalidArgumentException(sprintf('%s action already defined', $name));
             }
 
             $this->actions[] = $_action;

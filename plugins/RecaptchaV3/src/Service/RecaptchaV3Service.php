@@ -7,6 +7,7 @@ use Cake\Http\Client;
 use Cake\Http\Exception\BadRequestException;
 use Cake\Validation\Validator;
 use InvalidArgumentException;
+use RecaptchaV3\SiteVerifyResponse;
 
 /**
  * RecaptchaV3 service for handling remote service calls
@@ -50,9 +51,9 @@ class RecaptchaV3Service
      * @param string|null $remoteIp
      * @throws InvalidArgumentException If request payload failed validation
      * @throws BadRequestException If response from recaptcha service is not in the 2xx range
-     * @return array
+     * @return SiteVerifyResponse
      */
-    public function verifyRecaptchaResponse(string $gRecaptchaResponse, ?string $remoteIp = null): array
+    public function verifyRecaptchaResponse(string $gRecaptchaResponse, ?string $remoteIp = null): SiteVerifyResponse
     {
         $data = [
             'secret' => $this->secretKey,
@@ -95,6 +96,15 @@ class RecaptchaV3Service
             throw new BadRequestException(sprintf('Recaptcha response: %s', $body));
         }
 
-        return $response->getJson();
+        $responseBody = $response->getJson();
+
+        return new SiteVerifyResponse(
+            success: $responseBody['success'],
+            score: $responseBody['score'],
+            action: $responseBody['action'],
+            challengeTs: $responseBody['challenge_ts'],
+            hostname: $responseBody['hostname'],
+            errorCodes: $responseBody['error-codes'] ?? [],
+        );
     }
 }

@@ -19,27 +19,9 @@ class Assessment
     private bool $result = false;
 
     /**
-     * @param array $data The response data
-     * 
-     * Example when returned by `RecaptchaV3Service::verifyRecaptchaResponse`
-     * ```php
-     * [
-     *     // whether this request was a valid reCAPTCHA token for your site
-     *     "success" => true|false,
-     *     // the score for this request (0.0 - 1.0)
-     *     "score" => number,
-     *     // the action name for this request (important to verify)
-     *     "action" => string,
-     *     // timestamp of the challenge load (ISO format yyyy-MM-dd'T'HH:mm:ssZZ)
-     *     "challenge_ts" => timestamp,
-     *     // the hostname of the site where the reCAPTCHA was solved
-     *     "hostname" => string,
-     *     // optional
-     *     "error-codes" => [...],
-     *  ]
-     * ```
+     * @param SiteVerifyResponse $data The response data
      */
-    public function __construct(private readonly array $data)
+    public function __construct(private readonly SiteVerifyResponse $data)
     {
     }
 
@@ -50,7 +32,7 @@ class Assessment
      */
     public function getAction(): string
     {
-        return $this->data['action'];
+        return $this->data->getAction();
     }
 
     /**

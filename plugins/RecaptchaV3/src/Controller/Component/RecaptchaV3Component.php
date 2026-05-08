@@ -105,14 +105,4 @@ class RecaptchaV3Component extends Component
             }
         }
     }
-
-    /**
-     * Controller.beforeRender event hook
-     * 
-     * @return void
-     */
-    public function beforeRender()
-    {
-
-    }
 }

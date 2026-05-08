@@ -9,10 +9,10 @@ namespace RecaptchaV3;
 interface EvaluatorInterface
 {
     /**
-     * Evaluates the assessment data
+     * Evaluates the siteverify response data
      * 
-     * @param array $data
+     * @param SiteVerifyResponse $response
      * @return bool
      */
-    public function evaluate(array $data): bool;
+    public function evaluate(SiteVerifyResponse $response): bool;
 }
