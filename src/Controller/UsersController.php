@@ -12,7 +12,7 @@ use App\Service\JwtService;
 use App\Service\UsersMailerService;
 use Firebase\JWT\ExpiredException;
 use Exception;
-use RecaptchaV3\Rule;
+use RecaptchaV3\Action;
 
 /**
  * Users Controller
@@ -32,19 +32,19 @@ class UsersController extends AppController
         $this->loadComponent('RecaptchaV3.RecaptchaV3');
         $evaluator = new UsersEvaluator();
 
-        $this->RecaptchaV3->rules->add([
-            new Rule(
-                action: 'login',
+        $this->RecaptchaV3->actions->add([
+            new Action(
+                name: 'login',
                 evaluator: $evaluator,
                 onFailRedirect: ['_name' => 'users:login'],
             ),
-            new Rule(
-                action: 'register',
+            new Action(
+                name: 'register',
                 evaluator: $evaluator,
                 onFailRedirect: ['_name' => 'users:register'],
             ),
-            new Rule(
-                action: 'requestPasswordReset',
+            new Action(
+                name: 'request_password_reset',
                 evaluator: $evaluator,
                 onFailRedirect: ['_name' => 'users:requestPasswordReset'],
             ),

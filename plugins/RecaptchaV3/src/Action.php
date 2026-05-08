@@ -6,21 +6,19 @@ namespace RecaptchaV3;
 use Psr\Http\Message\UriInterface;
 
 /**
- * Rule
- * 
  * Maps a recaptcha action to a recaptcha assessment evaluator.
  */
-class Rule
+class Action
 {
     /**
-     * @param string $action The name of the recaptcha action
+     * @param string $name The name of the recaptcha action
      * @param EvaluatorInterface $evaluator
-     * @param array|string|UriInterface $onFailRedirect
+     * @param array|string|UriInterface|null $onFailRedirect
      */
     public function __construct(
-        private string $action,
+        private string $name,
         private EvaluatorInterface $evaluator,
-        private array|string|UriInterface $onFailRedirect,
+        private array|string|UriInterface|null $onFailRedirect = null,
     ) {
     }
 
@@ -29,9 +27,9 @@ class Rule
      * 
      * @return string
      */
-    public function getAction(): string
+    public function getName(): string
     {
-        return $this->action;
+        return $this->name;
     }
 
     /**

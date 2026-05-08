@@ -10,7 +10,7 @@ use Cake\Event\EventInterface;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\Http\ServerRequest;
 use RecaptchaV3\Assessment;
-use RecaptchaV3\RuleSet;
+use RecaptchaV3\ActionSet;
 
 /**
  * RecaptchaV3 component
@@ -18,9 +18,9 @@ use RecaptchaV3\RuleSet;
 class RecaptchaV3Component extends Component
 {
     /**
-     * @var RuleSet
+     * @var ActionSet
      */
-    public readonly RuleSet $rules;
+    public readonly ActionSet $actions;
 
     /**
      * @param ComponentRegistry $registry
@@ -33,7 +33,7 @@ class RecaptchaV3Component extends Component
         array $config = [],
     ) {
         parent::__construct($registry, $config);
-        $this->rules = new RuleSet();
+        $this->actions = new ActionSet();
     }
 
     /**
@@ -61,6 +61,8 @@ class RecaptchaV3Component extends Component
      * 
      * The RecaptchaV3Middleware will set the assessment on the request
      * upon a successful verification call.
+     * 
+     * @return Assessment|null
      */
     public function getAssessment(): ?Assessment
     {
@@ -89,17 +91,17 @@ class RecaptchaV3Component extends Component
                 return;
             }
 
-            $action = $assessment->getAction();
-            $rule = $this->rules->get($action);
+            $actionName = $assessment->getAction();
+            $action = $this->actions->get($actionName);
 
-            if ($rule === null) {
-                throw new InternalErrorException(sprintf('Missing rule for action %s', $action));
+            if ($action === null) {
+                throw new InternalErrorException(sprintf('Missing rule for action %s', $actionName));
             }
 
-            if (!$assessment->evaluate($rule->getEvaluator())) {
+            if (!$assessment->evaluate($action->getEvaluator())) {
                 $event->stopPropagation();
                 $this->getController()->Flash->error(__('Recaptcha failed'));
-                $this->getController()->redirect($rule->getOnFailRedirect());
+                $this->getController()->redirect($action->getOnFailRedirect());
             }
         }
     }
