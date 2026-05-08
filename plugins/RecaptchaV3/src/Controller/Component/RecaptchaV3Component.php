@@ -72,12 +72,13 @@ class RecaptchaV3Component extends Component
     /**
      * Set the site key on the view
      * 
+     * @param string $var The name of the view var to set as
      * @return void
      */
-    public function setSiteKey(): void
+    public function setSiteKey(string $var = 'recaptchaV3SiteKey'): void
     {
         $this->getController()->set([
-            'recaptchaV3SiteKey' => $this->recaptchaV3->getSiteKey(),
+            $var => $this->recaptchaV3->getSiteKey(),
         ]);
     }
 
