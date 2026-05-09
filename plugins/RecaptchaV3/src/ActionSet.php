@@ -18,29 +18,37 @@ class ActionSet
     private array $actions = [];
 
     /**
+     * @param Action|array $actions
+     */
+    public function __construct(Action|array $actions = [])
+    {
+        $this->add($actions);
+    }
+
+    /**
      * Adds a Action to the set
      * 
      * Uniqueness is guaranteed by the Action action name.
      * 
-     * @param Action|Action[] $action Action instance
+     * @param Action|Action[] $actions Action instance
      * @throws InvalidArgumentException If a Action already exists with the same 
      *  controller action name
      * @return $this
      */
-    public function add(Action|array $action): static
+    public function add(Action|array $actions): static
     {
-        if (!is_array($action)) {
-            $action = [$action];
+        if (!is_array($actions)) {
+            $actions = [$actions];
         }
 
-        foreach ($action as $_action) {
-            $name = $_action->getName();
+        foreach ($actions as $action) {
+            $name = $action->getName();
 
             if ($this->get($name)) {
                 throw new InvalidArgumentException(sprintf('%s action already defined', $name));
             }
 
-            $this->actions[] = $_action;
+            $this->actions[] = $action;
         }
 
         return $this;
