@@ -12,6 +12,6 @@ class LoginEvaluator implements EvaluatorInterface
     #[Override]
     public function evaluate(SiteVerifyResponse $response): bool
     {
-        throw new \Exception('Not implemented');
+        return $response->getScore() >= 0.5;
     }
 }

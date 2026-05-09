@@ -99,10 +99,15 @@ return [
      * Define JWT secrets.
      * 
      * JWT is used for specific authenticated requests (password reset, email verification, etc)
+     * 
+     * `key` - For private keys (when using asymetric pairs) or shared keys (symetric).
+     * 
+     * `publicKey` - For the shared key when using asymetric key pairs (ie: RS256).
      */
     'UserJwt' => [
-        'publicKey' => '',
-        'privateKey' => '',
-        'algorithm' => '',
+        'algorithm' => 'HS256', // Default to symmetric for simplicity
+        'key' => env('JWT_SECRET'), 
+        'publicKey' => env('JWT_PUBLIC_KEY'), // Optional for HS256
+        'passphrase' => env('JWT_PASSPHRASE'), // Required if your RSA key is encrypted (not currently used)
     ],
 ];

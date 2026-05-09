@@ -33,7 +33,6 @@ use Cake\Http\MiddlewareQueue;
 use Cake\ORM\Locator\TableLocator;
 use Cake\Routing\Middleware\AssetMiddleware;
 use Cake\Routing\Middleware\RoutingMiddleware;
-use League\Container\Argument\Literal\StringArgument;
 
 /**
  * Application setup class.
@@ -114,12 +113,18 @@ class Application extends BaseApplication
     {
         // Allow your Tables to be dependency injected
         //$container->delegate(new \Cake\ORM\Locator\TableContainer());
-        $container
-            ->addShared(JwtService::class)
-            ->addArguments([
-                new StringArgument(Configure::read('UserJwt.algorithm')),
-                new StringArgument(Configure::readOrFail('UserJwt.key')),
-            ]);
+
+        $container->addShared(JwtService::class, static function () {
+            $algorithm = Configure::readOrFail('UserJwt.algorithm');
+            $key = Configure::readOrFail('UserJwt.key');
+            $publicKey = Configure::read('UserJwt.publicKey');
+
+            return new JwtService(
+                algorithm: $algorithm,
+                key: $key,
+                publicKey: $publicKey,
+            );
+        });
 
         $container
             ->addShared(UsersMailerService::class)
