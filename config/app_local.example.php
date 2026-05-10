@@ -96,6 +96,15 @@ return [
     ],
 
     /*
+     * Accounts configuration
+     */
+    'Accounts' => [
+        'registration' => [
+            'requireEmailVerification' => true,
+        ],
+    ],
+
+    /*
      * Define JWT secrets.
      * 
      * JWT is used for specific authenticated requests (password reset, email verification, etc)

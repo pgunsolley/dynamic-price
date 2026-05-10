@@ -10,6 +10,7 @@ use App\Form\UserForm\Enum\Status;
 use App\RecaptchaV3\LoginEvaluator;
 use App\RecaptchaV3\RegisterEvaluator;
 use App\RecaptchaV3\RequestPasswordResetEvaluator;
+use App\Service\AccountsService;
 use App\Service\JwtService;
 use App\Service\UsersMailerService;
 use Firebase\JWT\ExpiredException;
@@ -241,7 +242,7 @@ class UsersController extends AppController
         $this->set(compact('form'));
     }
 
-    public function login(JwtService $jwt)
+    public function login(JwtService $jwt, AccountsService $accounts)
     {
         $form = new UserForm();
 
@@ -253,8 +254,7 @@ class UsersController extends AppController
                 /** @var \App\Model\Entity\User $user */
                 $user = $form->getUser();
 
-                if ($user->email_verified) {
-                    // Successful login
+                if ($accounts->requireEmailVerification === false || $user->email_verified) {
                     $this->Authentication->setIdentity($user);
                     return $this->redirect([]); // TODO: Redirect to landing
                 }

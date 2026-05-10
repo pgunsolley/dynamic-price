@@ -18,6 +18,7 @@ namespace App;
 
 use App\Authentication\AppAuthenticationServiceProvider;
 use App\Middleware\HostHeaderMiddleware;
+use App\Service\AccountsService;
 use App\Service\JwtService;
 use App\Service\UsersMailerService;
 use Authentication\Middleware\AuthenticationMiddleware;
@@ -33,6 +34,7 @@ use Cake\Http\MiddlewareQueue;
 use Cake\ORM\Locator\TableLocator;
 use Cake\Routing\Middleware\AssetMiddleware;
 use Cake\Routing\Middleware\RoutingMiddleware;
+use League\Container\Argument\Literal\BooleanArgument;
 
 /**
  * Application setup class.
@@ -129,6 +131,10 @@ class Application extends BaseApplication
         $container
             ->addShared(UsersMailerService::class)
             ->addArgument(JwtService::class);
+
+        $container
+            ->addShared(AccountsService::class)
+            ->addArgument(new BooleanArgument(Configure::read('Accounts.registration.requireEmailVerification', true)));
     }
 
     /**
