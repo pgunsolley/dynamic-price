@@ -15,4 +15,5 @@ return [
     'RecaptchaV3' => [],
     'Mailgun' => [],
     'ContactManager' => [],
+    'Crud' => [],
 ];
