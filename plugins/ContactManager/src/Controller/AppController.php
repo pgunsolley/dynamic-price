@@ -16,7 +16,7 @@ class AppController extends BaseController
     {
         parent::initialize();
         $this->loadComponent('Crud.Crud', [
-            'action' => [
+            'actions' => [
                 'Crud.Index',
                 'Crud.View',
                 'Crud.Add',

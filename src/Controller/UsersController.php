@@ -256,7 +256,7 @@ class UsersController extends AppController
 
                 if ($accounts->requireEmailVerification === false || $user->email_verified) {
                     $this->Authentication->setIdentity($user);
-                    return $this->redirect([]); // TODO: Redirect to landing
+                    return $this->redirect(['_name' => 'contactManager:contacts:index']); // TODO: Redirect to landing (using contact manager for now)
                 }
 
                 return $this->redirect([
