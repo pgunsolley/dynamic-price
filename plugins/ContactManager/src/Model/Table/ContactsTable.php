@@ -31,6 +31,8 @@ use Cake\Validation\Validator;
  */
 class ContactsTable extends Table
 {
+    use DefaultConnectionTrait;
+
     /**
      * Initialize method
      *
