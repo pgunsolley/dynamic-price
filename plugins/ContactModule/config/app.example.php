@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'ContactManager' => [
+    'ContactModule' => [
         /*
          * The database connection name for models.
          * The connection must be configured in the host application.

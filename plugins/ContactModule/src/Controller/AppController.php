@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace ContactManager\Controller;
+namespace ContactModule\Controller;
 
 use App\Controller\AppController as BaseController;
 use Crud\Controller\ControllerTrait;

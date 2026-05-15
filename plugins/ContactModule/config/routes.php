@@ -5,11 +5,11 @@ use Cake\Routing\RouteBuilder;
 
 return function (RouteBuilder $routes): void {
     $routes->plugin(
-        'ContactManager',
-        ['path' => '/contact-manager', '_namePrefix' => 'contactManager:'],
+        'ContactModule',
+        ['path' => '/contacts', '_namePrefix' => 'contactModule:'],
         function (RouteBuilder $builder) {
             $builder->scope(
-                '/contacts', 
+                '/', 
                 ['controller' => 'Contacts', '_namePrefix' => 'contacts:'],
                 function (RouteBuilder $builder) {
                     $builder
@@ -42,7 +42,7 @@ return function (RouteBuilder $routes): void {
                 }
             );
             $builder->scope(
-                '/contact-emails', 
+                '/emails', 
                 ['controller' => 'ContactEmails', '_namePrefix' => 'contactEmails:'],
                 function (RouteBuilder $builder) {
                     $builder
@@ -75,7 +75,7 @@ return function (RouteBuilder $routes): void {
                 }
             );
             $builder->scope(
-                '/contact-phones', 
+                '/phones', 
                 ['controller' => 'ContactPhones', '_namePrefix' => 'contactPhones:'],
                 function (RouteBuilder $builder) {
                     $builder
@@ -108,7 +108,7 @@ return function (RouteBuilder $routes): void {
                 }
             );
             $builder->scope(
-                '/contact-links', 
+                '/links', 
                 ['controller' => 'ContactLinks', '_namePrefix' => 'contactLinks:'],
                 function (RouteBuilder $builder) {
                     $builder

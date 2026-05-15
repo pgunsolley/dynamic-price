@@ -1,23 +1,23 @@
 <?php
 declare(strict_types=1);
 
-namespace ContactManager\Model\Entity;
+namespace ContactModule\Model\Entity;
 
 use Cake\ORM\Entity;
 
 /**
- * ContactPhone Entity
+ * ContactEmail Entity
  *
  * @property int $id
  * @property int $contact_id
  * @property string $label
- * @property string $phone
+ * @property string $email
  * @property \Cake\I18n\DateTime $created
  * @property \Cake\I18n\DateTime $modified
  *
- * @property \ContactManager\Model\Entity\Contact $contact
+ * @property \ContactModule\Model\Entity\Contact $contact
  */
-class ContactPhone extends Entity
+class ContactEmail extends Entity
 {
     /**
      * Fields that can be mass assigned using newEntity() or patchEntity().
@@ -31,7 +31,7 @@ class ContactPhone extends Entity
     protected array $_accessible = [
         'contact_id' => true,
         'label' => true,
-        'phone' => true,
+        'email' => true,
         'created' => true,
         'modified' => true,
         'contact' => true,

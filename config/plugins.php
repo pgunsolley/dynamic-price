@@ -14,6 +14,6 @@ return [
     'Authentication' => [],
     'RecaptchaV3' => [],
     'Mailgun' => [],
-    'ContactManager' => [],
+    'ContactModule' => [],
     'Crud' => [],
 ];

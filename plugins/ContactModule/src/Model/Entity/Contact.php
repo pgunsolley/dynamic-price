@@ -1,23 +1,26 @@
 <?php
 declare(strict_types=1);
 
-namespace ContactManager\Model\Entity;
+namespace ContactModule\Model\Entity;
 
 use Cake\ORM\Entity;
 
 /**
- * ContactLink Entity
+ * Contact Entity
  *
  * @property int $id
- * @property int $contact_id
- * @property string $label
- * @property string $url
+ * @property string $first_name
+ * @property string|null $middle_initial
+ * @property string $last_name
+ * @property string|null $notes
  * @property \Cake\I18n\DateTime $created
  * @property \Cake\I18n\DateTime $modified
  *
- * @property \ContactManager\Model\Entity\Contact $contact
+ * @property \ContactModule\Model\Entity\ContactEmail[] $contact_emails
+ * @property \ContactModule\Model\Entity\ContactLink[] $contact_links
+ * @property \ContactModule\Model\Entity\ContactPhone[] $contact_phones
  */
-class ContactLink extends Entity
+class Contact extends Entity
 {
     /**
      * Fields that can be mass assigned using newEntity() or patchEntity().
@@ -29,11 +32,14 @@ class ContactLink extends Entity
      * @var array<string, bool>
      */
     protected array $_accessible = [
-        'contact_id' => true,
-        'label' => true,
-        'url' => true,
+        'first_name' => true,
+        'middle_initial' => true,
+        'last_name' => true,
+        'notes' => true,
         'created' => true,
         'modified' => true,
-        'contact' => true,
+        'contact_emails' => true,
+        'contact_links' => true,
+        'contact_phones' => true,
     ];
 }
