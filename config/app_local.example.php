@@ -119,4 +119,36 @@ return [
         'publicKey' => env('JWT_PUBLIC_KEY'), // Optional for HS256
         'passphrase' => env('JWT_PASSPHRASE'), // Required if your RSA key is encrypted (not currently used)
     ],
+
+    /*
+     * Configuration for the RecaptchaV3 plugin
+     */
+    'RecaptchaV3' => [
+        /*
+         * The secret key string
+         */
+        'secretKey' => null,
+
+        /*
+         * The site key string
+         */
+        'siteKey' => null,
+
+        /*
+         * A flag to enable or disable sending the requester's 
+         * IP to the recaptcha service for enhanced results.
+         */
+        'sendRemoteIp' => true,
+    ],
+
+    /*
+     * Configuration for the ContactModule plugin
+     */
+    'ContactModule' => [
+        /*
+         * The database connection name for models.
+         * The connection must be configured in the host application.
+         */
+        'connection' => '',
+    ],
 ];

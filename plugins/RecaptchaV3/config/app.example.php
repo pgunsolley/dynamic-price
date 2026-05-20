@@ -3,35 +3,19 @@
 return [
     'RecaptchaV3' => [
         /*
-         * Configuration for included services
+         * The secret key string
          */
-        'Services' => [
-            /*
-             * Service for making requests with the recaptcha service
-             */
-            'RecaptchaV3' => [
-                'secretKey' => '',
-                'siteKey' => '',
-            ],
-        ],
+        'secretKey' => null,
 
         /*
-         * Configuration for included middleware
+         * The site key string
          */
-        'Middleware' => [
-            'RecaptchaV3' => [
-                /*
-                 * A flag to enable or disable sending the requester's 
-                 * IP to the recaptcha service for enhanced results.
-                 */
-                'sendRemoteIp' => true,
-            ],
-        ],
+        'siteKey' => null,
 
         /*
-         * The database connection name for models.
-         * The connection must be configured in the host application.
+         * A flag to enable or disable sending the requester's 
+         * IP to the recaptcha service for enhanced results.
          */
-        'connection' => '',
+        'sendRemoteIp' => true,
     ],
 ];
