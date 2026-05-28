@@ -13,7 +13,6 @@ return [
     ],
     'Authentication' => [],
     'RecaptchaV3' => [],
-    'Mailgun' => [],
     'ContactModule' => [],
     'Crud' => [],
 ];
